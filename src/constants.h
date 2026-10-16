@@ -70,6 +70,13 @@ namespace Constants {
     inline constexpr const char* PREF_APPEARANCE_THEME = "AppearanceTheme";
     inline constexpr const char* THEME_DARK = "dark";
     inline constexpr const char* THEME_LIGHT = "light";
+
+    // --- Interface language (src/shell/applanguage.h) ---
+    // "en", "th", etc. — which translation catalog AppLanguage loads.
+    // Absent or unrecognised = "en", so the app defaults to English.
+    inline constexpr const char* PREF_LANGUAGE = "Language";
+    inline constexpr const char* LANG_ENGLISH = "en";
+    inline constexpr const char* LANG_THAI = "th";
     // --- Anonymous install ping (src/core/installping.h) ---
     // Random per-installation UUID the ping carries; created on first use. A Factory Reset wipes
     // the Preferences table, so a reset install counts as a new one — acceptable.

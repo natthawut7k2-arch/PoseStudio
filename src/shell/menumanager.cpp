@@ -354,7 +354,7 @@ void MenuManager::setAssetManagerWidget(AssetManagerWidget *widget) {
     if (!assetManagerWidget) return;
 
     QObject::connect(assetManagerWidget, &AssetManagerWidget::manageAssetFoldersRequested,
-                      mainWindow, [this]() { openPreferencesDialog(tr("Assets")); });
+                      mainWindow, [this]() { openPreferencesDialog(QStringLiteral("Assets")); });
 }
 
 void MenuManager::setViewportWidget(pose::ViewportWidget *viewport) {

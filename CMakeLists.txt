@@ -155,6 +155,8 @@ add_executable(
     src/shell/splashoverlay.h
     src/shell/apptheme.cpp                # AppTheme::install: icon, Fusion proxy style, QSS modules, menu shadows
     src/shell/apptheme.h
+    src/shell/applanguage.cpp             # AppLanguage: translation catalog loading and runtime switching
+    src/shell/applanguage.h
     src/shell/appproxystyle.h
     src/help/helpwindow.cpp               # Help -> User Manual (F1): contents tree + page browser + search
     src/help/helpwindow.h
@@ -827,5 +829,23 @@ if(_posestudio_multi_config)
                 "${SHADER_BINARY_DIR}"
                 "$<TARGET_FILE_DIR:PoseStudio>/shaders"
         COMMENT "Mirroring compiled SPIR-V shaders next to the executable"
+    )
+endif()
+
+# ==============================================================================
+# [ TRANSLATIONS / I18N ]
+# ==============================================================================
+# Translation catalogs (.qm) are compiled from .ts files in resources/translations/
+# and embedded directly into the executable via resources.qrc.
+# If Qt's lrelease tool is available, configure an optional target to recompile QM files.
+find_package(Qt6 COMPONENTS LinguistTools QUIET)
+if(TARGET Qt6::lrelease)
+    set(TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/resources/translations/posestudio_th.ts")
+    set(QM_FILES "${CMAKE_CURRENT_SOURCE_DIR}/resources/translations/posestudio_th.qm")
+    add_custom_target(compile_translations
+        COMMAND Qt6::lrelease "${TS_FILES}" -qm "${QM_FILES}"
+        DEPENDS "${TS_FILES}"
+        COMMENT "Compiling translation catalogs with lrelease"
+        VERBATIM
     )
 endif()

@@ -111,12 +111,37 @@ struct ViewEntry {
     bool        separatorAfter;
 };
 constexpr ViewEntry kViewEntries[] = {
-    {"Home View", ViewPreset::Home, true},      {"Top View", ViewPreset::Top, false},
-    {"Bottom View", ViewPreset::Bottom, true},  {"Front View", ViewPreset::Front, false},
-    {"Back View", ViewPreset::Back, true},      {"Left View", ViewPreset::Left, false},
-    {"Right View", ViewPreset::Right, false},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Home View"), ViewPreset::Home, true},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Top View"), ViewPreset::Top, false},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Bottom View"), ViewPreset::Bottom, true},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Front View"), ViewPreset::Front, false},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Back View"), ViewPreset::Back, true},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Left View"), ViewPreset::Left, false},
+    {QT_TRANSLATE_NOOP("ViewportStrip", "Right View"), ViewPreset::Right, false},
 };
 constexpr int kViewEntryCount = static_cast<int>(sizeof(kViewEntries) / sizeof(kViewEntries[0]));
+
+// Backing source literals so lupdate extracts shade picker names for ViewportStrip translation:
+[[maybe_unused]] static const char* const kTranslatablePickerStrings[] = {
+    QT_TRANSLATE_NOOP("ViewportStrip", "PBR Shaded"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Texture Shaded"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Flat Texture Shaded"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Cartoon Shaded"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Matcap"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Clay Shaded"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Lighting Only"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Silhouette"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Wireframe"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Hidden Line Wireframe"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Clay Shaded Wireframe"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Texture Shaded Wireframe"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Albedo"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Ambient Occlusion"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Roughness Map"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Specular Only"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "Normals"),
+    QT_TRANSLATE_NOOP("ViewportStrip", "UV Checker"),
+};
 
 } // namespace
 

@@ -26,8 +26,8 @@ class PreferencesDialog : public QDialog {
 public:
     explicit PreferencesDialog(QWidget* parent = nullptr);
 
-    /// Jumps to the tab whose nav label matches `tabLabel` (e.g. "Assets"). No-op if not found.
-    void selectTab(const QString& tabLabel);
+    /// Jumps to the tab whose nav label or ID matches `tabIdOrLabel` (e.g. "Assets"). No-op if not found.
+    void selectTab(const QString& tabIdOrLabel);
 
 signals:
     /// Forwarded from AssetsPreferencesPanel so callers don't need to know which tab owns it.
@@ -39,7 +39,7 @@ signals:
 
 private:
     /// Registers a panel as a tab: adds its label to the left nav and its page to the stack.
-    void addPanel(const QString& tabLabel, PreferencesPanel* panel);
+    void addPanel(const QString& tabLabel, PreferencesPanel* panel, const QString& tabId = QString());
 
     QListWidget* m_nav = nullptr;
     QStackedWidget* m_stack = nullptr;

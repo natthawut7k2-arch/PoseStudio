@@ -70,33 +70,39 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
         accept(); // close so the navigation in the main window behind us is actually visible
     });
 
-    addPanel(tr("General"),       new GeneralPreferencesPanel(this));
-    addPanel(tr("Interface"),      new InterfacePreferencesPanel(this));
-    addPanel(tr("Assets"),        assetsPanel);
+    addPanel(tr("General"),       new GeneralPreferencesPanel(this),       QStringLiteral("General"));
+    addPanel(tr("Interface"),     new InterfacePreferencesPanel(this),     QStringLiteral("Interface"));
+    addPanel(tr("Assets"),        assetsPanel,                             QStringLiteral("Assets"));
     addPanel(tr("Input"),
              new PlaceholderPreferencesPanel(
                  tr("Input"),
-                 tr("Keyboard and input settings will appear here."), this));
+                 tr("Keyboard and input settings will appear here."), this), QStringLiteral("Input"));
     addPanel(tr("Navigation"),
              new PlaceholderPreferencesPanel(
                  tr("Navigation"),
-                 tr("Viewport navigation settings will appear here."), this));
+                 tr("Viewport navigation settings will appear here."), this), QStringLiteral("Navigation"));
     addPanel(tr("System"),
              new PlaceholderPreferencesPanel(
                  tr("System"),
-                 tr("System, performance, and storage settings will appear here."), this));
-    addPanel(tr("Factory Reset"), new FactoryResetPreferencesPanel(this));
+                 tr("System, performance, and storage settings will appear here."), this), QStringLiteral("System"));
+    addPanel(tr("Factory Reset"), new FactoryResetPreferencesPanel(this),   QStringLiteral("Factory Reset"));
 
     m_nav->setCurrentRow(0);
 }
 
-void PreferencesDialog::selectTab(const QString& tabLabel) {
-    const QList<QListWidgetItem*> matches = m_nav->findItems(tabLabel, Qt::MatchExactly);
-    if (!matches.isEmpty()) m_nav->setCurrentItem(matches.first());
+void PreferencesDialog::selectTab(const QString& tabIdOrLabel) {
+    for (int i = 0; i < m_nav->count(); ++i) {
+        QListWidgetItem* item = m_nav->item(i);
+        if (item->text() == tabIdOrLabel || item->data(Qt::UserRole).toString() == tabIdOrLabel) {
+            m_nav->setCurrentItem(item);
+            return;
+        }
+    }
 }
 
-void PreferencesDialog::addPanel(const QString& tabLabel, PreferencesPanel* panel) {
+void PreferencesDialog::addPanel(const QString& tabLabel, PreferencesPanel* panel, const QString& tabId) {
     auto* item = new QListWidgetItem(tabLabel, m_nav);
+    item->setData(Qt::UserRole, tabId.isEmpty() ? tabLabel : tabId);
     // A fixed row height in code rather than QSS ::item vertical padding — the same fix, for the
     // same reason, as the Assets page's library list: see AssetsPreferencesPanel::reloadLibraries.
     item->setSizeHint(QSize(0, 38));

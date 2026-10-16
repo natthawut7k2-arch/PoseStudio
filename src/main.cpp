@@ -18,6 +18,7 @@
 #include "updatecheck.h"
 #include "assetmanagerwidget.h"
 #include "apptheme.h"
+#include "applanguage.h"
 #include "environmentpanel.h"
 #include "transformpanel.h"
 #include "viewport/viewportwidget.h"
@@ -95,7 +96,8 @@ int main(int argc, char *argv[]) {
 
     PreferencesManager::instance().loadFromDatabase();
 
-    // --- 2. Branding & theming (window icon, Fusion proxy style, the QSS modules, menu shadows) ---
+    // --- 2. Language & theming ---
+    AppLanguage::install(app);
     AppTheme::install(app);
 
     // --- 3. Main window layout ---

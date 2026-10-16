@@ -13,8 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+* **Multilingual support (English / Thai) with runtime switching.** Added full internationalization (i18n) infrastructure via `AppLanguage`. Users can switch between English and ภาษาไทย (Thai) from Preferences → Interface (remembered across restarts). The entire user interface — menus, panels, dialogs, viewport controls, shading modes, and tooltips (282 messages + standard dialog buttons) — is fully translated into Thai, while keeping English source code strings clean and untouched. Future languages can be added seamlessly by registering a new `.qm` catalog.
+
 ### Changed
-* **Interface text is ready for translation.** Every menu, dialog, tooltip and message in the app is now marked as translatable, so other languages can be added later without reworking the code. Nothing changes on screen: PoseStudio is English-only for now. (#33 — thanks @DmitryAkDev)
+* **Interface text is ready for translation.** Every menu, dialog, tooltip and message in the app is now marked as translatable, so other languages can be added later without reworking the code. (#33 — thanks @DmitryAkDev)
 
 ## [0.3.16] - 2026-09-30
 
