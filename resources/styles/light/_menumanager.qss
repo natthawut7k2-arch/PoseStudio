@@ -14,9 +14,9 @@
 
 QMenuBar {
     padding: 4px;
-    border-bottom: 1px solid #d3d7dc;
-    background-color: #eef0f2;
-    color: #1a1b1c;
+    border-bottom: 1px solid #d5ded7;
+    background-color: #f2f5f3;
+    color: #1e2621;
 }
 
 QMenuBar::item {
@@ -31,7 +31,7 @@ QMenuBar::item {
 
 QMenuBar::item:selected {
     border-radius: 4px;
-    background-color: #314D7A;
+    background-color: #275a3c;
     color: #ffffff;
 }
 
@@ -45,10 +45,10 @@ QMenuBar::item:selected {
    4px radius below). Result: rounded corners, no shadow. Change the radius here and there together. */
 QMenu {
     padding: 4px;
-    border: 1px solid #b9bec5;
+    border: 1px solid #bcc7bd;
     border-radius: 4px;
     background-color: #ffffff;
-    color: #1a1b1c;
+    color: #1e2621;
 }
 
 QMenu::item {
@@ -57,12 +57,12 @@ QMenu::item {
 
 QMenu::item:selected {
     border-radius: 4px;
-    background-color: #314D7A;
+    background-color: #275a3c;
     color: #ffffff;
 }
 
 QMenu::item:disabled {
-    color: #9aa1a9;
+    color: #93a096;
 }
 
 /* Separators between item groups — EVERY QMenu in the app. The same grey

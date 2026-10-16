@@ -30,14 +30,14 @@ const QString kManualRoot = QStringLiteral(":/manual/");
 /// these are the parts a QTextDocument carries in its own formats. Functions, not constants:
 /// render() runs per page, so a runtime theme switch re-renders with the active palette.
 /// (Dark values first, light second — see AppTheme::themed.)
-QColor kHeadingColour() { return AppTheme::themed(QColor(QStringLiteral("#ffffff")), QColor(QStringLiteral("#1a1b1c"))); }
-QColor kLinkColour() { return QColor(QLatin1String(Constants::COLOR_ACCENT)); }
-QColor kCodeText() { return AppTheme::themed(QColor(QStringLiteral("#e8e8e8")), QColor(QStringLiteral("#33363b"))); }
-QColor kCodeBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#e8ebee"))); }
-QColor kCodeBlockBackground() { return AppTheme::themed(QColor(QStringLiteral("#141516")), QColor(QStringLiteral("#f2f3f5"))); }
-QColor kQuoteText() { return AppTheme::themed(QColor(QStringLiteral("#a8a8a8")), QColor(QStringLiteral("#6f747a"))); }
-QColor kTableBorder() { return AppTheme::themed(QColor(QStringLiteral("#3a3b3c")), QColor(QStringLiteral("#c4c7cb"))); }
-QColor kTableHeaderBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#e3e6ea"))); }
+QColor kHeadingColour() { return AppTheme::themed(QColor(QStringLiteral("#ffffff")), QColor(QStringLiteral("#1e2621"))); }
+QColor kLinkColour() { return AppTheme::themed(QColor(QLatin1String(Constants::COLOR_ACCENT)), QColor(QStringLiteral("#2e7d4f"))); }
+QColor kCodeText() { return AppTheme::themed(QColor(QStringLiteral("#e8e8e8")), QColor(QStringLiteral("#2d3d31"))); }
+QColor kCodeBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#edf4ef"))); }
+QColor kCodeBlockBackground() { return AppTheme::themed(QColor(QStringLiteral("#141516")), QColor(QStringLiteral("#f2f7f3"))); }
+QColor kQuoteText() { return AppTheme::themed(QColor(QStringLiteral("#a8a8a8")), QColor(QStringLiteral("#55685a"))); }
+QColor kTableBorder() { return AppTheme::themed(QColor(QStringLiteral("#3a3b3c")), QColor(QStringLiteral("#cad4cc"))); }
+QColor kTableHeaderBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#e5eee7"))); }
 
 QString readResource(const QString& path) {
     QFile file(path);

@@ -13,27 +13,27 @@
    ========================================================================= */
 
 #PreferencesNav {
-    background-color: #eef0f2;
+    background-color: #f2f5f3;
     border: none;
     outline: 0;
     padding-top: 8px;
 }
 
 #PreferencesNav::item {
-    color: #5a5e63;
+    color: #556258;
     padding: 10px 16px;
     border-left: 3px solid transparent; /* reserves space so selection doesn't shift text */
 }
 
 #PreferencesNav::item:hover {
-    background-color: #e3e6ea;
-    color: #1a1b1c;
+    background-color: #e3e9e4;
+    color: #1e2621;
 }
 
 #PreferencesNav::item:selected {
     background-color: #ffffff;        /* matches the panel area, so the tab "connects" to it */
-    color: #1a1b1c;
-    border-left: 3px solid #314d7a;   /* accent marker — matches the Asset Manager selection blue */
+    color: #1e2621;
+    border-left: 3px solid #275a3c;   /* accent marker — deep forest green */
 }
 
 /* =========================================================================
@@ -45,18 +45,18 @@
 }
 
 #PreferencesPanelHeading {
-    color: #1a1b1c;
+    color: #1e2621;
     font-size: 16px;
     font-weight: bold;
 }
 
 #PreferencesPlaceholder {
-    color: #6f747a;
+    color: #738276;
     font-size: 13px;
 }
 
 #PreferencesDescription {
-    color: #5a5e63;
+    color: #556258;
     font-size: 12px;
 }
 
@@ -68,7 +68,7 @@
 
 #PreferencesPanel QCheckBox,
 #PreferencesPanel QRadioButton {
-    color: #33363b;
+    color: #334036;
     font-size: 13px;
     spacing: 6px;
 }
@@ -76,18 +76,18 @@
 #PreferencesPanel QRadioButton::indicator {
     width: 15px;
     height: 15px;
-    border: 1px solid #a8adb3;
+    border: 1px solid #a3b5a6;
     border-radius: 8px;
     background: #ffffff;
 }
 
 #PreferencesPanel QRadioButton::indicator:hover {
-    border-color: #5b87cc;
+    border-color: #2e7d4f;
 }
 
 #PreferencesPanel QRadioButton::indicator:checked {
-    background: #5b87cc;
-    border-color: #5b87cc;
+    background: #2e7d4f;
+    border-color: #2e7d4f;
 }
 
 /* =========================================================================
@@ -99,8 +99,8 @@
    Source order also matters: :selected comes after :hover so it wins when a row is both. */
 #AssetLibraryList {
     background-color: #ffffff;
-    color: #33363b;
-    border: 1px solid #c4c7cb;
+    color: #334036;
+    border: 1px solid #b8c7bb;
     border-radius: 4px;
     outline: none;
 }
@@ -115,11 +115,11 @@
 }
 
 #AssetLibraryList::item:hover {
-    background-color: #e8ebee;
+    background-color: #ebf5ee;
 }
 
 #AssetLibraryList::item:selected {
-    background-color: #314d7a;
+    background-color: #275a3c;
     color: #ffffff;
 }
 
@@ -129,48 +129,48 @@
 
 #FactoryResetConfirmInput {
     background-color: #ffffff;
-    border: 1px solid #c4c7cb;
+    border: 1px solid #b8c7bb;
     border-radius: 4px;
-    color: #1a1b1c;
+    color: #1e2621;
     padding: 4px 6px;
     font-size: 12px;
-    selection-background-color: #314d7a;
+    selection-background-color: #275a3c;
     selection-color: #ffffff;
 }
 
 #FactoryResetConfirmInput:hover {
     background-color: #ffffff;
-    border: 1px solid #c4c7cb;
+    border: 1px solid #b8c7bb;
 }
 
 #FactoryResetConfirmInput:focus {
-    border: 1px solid #c4c7cb;
+    border: 1px solid #b8c7bb;
     outline: 0;
 }
 
 /* =========================================================================
-   [ FACTORY RESET BUTTON — themed in the app's accent blue ]
+   [ FACTORY RESET BUTTON — themed in deep forest green ]
    ========================================================================= */
 
 #FactoryResetButton {
-    background-color: #3a5a8c;
+    background-color: #275a3c;
     color: #ffffff;
-    border: 1px solid #5b87cc;
+    border: 1px solid #2e7d4f;
     border-radius: 4px;
     padding: 6px 16px;
     min-width: 70px;
 }
 
 #FactoryResetButton:hover {
-    background-color: #46689e;
+    background-color: #326e49;
 }
 
 #FactoryResetButton:pressed {
-    background-color: #5b87cc;
+    background-color: #2e7d4f;
 }
 
 #FactoryResetButton:disabled {
-    background-color: #e3e6ea;
-    color: #9aa1a9;
-    border: 1px solid #c4c7cb;
+    background-color: #e3e9e4;
+    color: #93a096;
+    border: 1px solid #cad4cc;
 }

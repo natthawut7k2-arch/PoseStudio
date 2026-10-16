@@ -36,12 +36,13 @@ namespace {
 // combo field. No cursor override on the strip's controls: Windows apps keep the standard arrow
 // over buttons (the hand cursor reads as a hyperlink there).
 QString pickerStyle(const QString& objectName, int minWidthPx) {
-    // Strip fields follow the active theme (dark #252627 / light #ffffff); hover keeps
-    // the shared selection fill in both. Rebuilt per strip, so a runtime theme switch
-    // applies to strips created afterwards — existing strips repolish via AppTheme.
+    // Strip fields follow the active theme (dark #252627 / light #ffffff); hover uses
+    // the theme selection fill (#314D7A in dark, #275a3c in light). Rebuilt per strip, so a runtime
+    // theme switch applies to strips created afterwards — existing strips repolish via AppTheme.
     const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
-    const QString text = AppTheme::themed<QString>(QStringLiteral("#e8e8ea"), QStringLiteral("#1a1b1c"));
-    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a8adb3"));
+    const QString text = AppTheme::themed<QString>(QStringLiteral("#e8e8ea"), QStringLiteral("#1e2621"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a3b5a6"));
+    const QString hoverBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
     return QStringLiteral("#%1 {"
                           "  background-color: %2;"
                           "  color: %3;"
@@ -52,11 +53,12 @@ QString pickerStyle(const QString& objectName, int minWidthPx) {
                           "  font-size: 12px;"
                           "  text-align: left;"
                           "}"
-                          "#%1:hover { background-color: #314D7A; color: #ffffff; }"
+                          "#%1:hover { background-color: %6; color: #ffffff; }"
                           "#%1::menu-indicator { subcontrol-position: right center;"
                           "  subcontrol-origin: padding; right: 8px; }")
         .arg(objectName, surface, text, border)
-        .arg(minWidthPx);
+        .arg(minWidthPx)
+        .arg(hoverBg);
 }
 
 // The icon buttons' style: the same surface/hover as the picker fields so the strip reads as
@@ -64,7 +66,10 @@ QString pickerStyle(const QString& objectName, int minWidthPx) {
 // hover so the two states stay distinguishable.
 QString iconButtonStyle(const QString& objectName, bool checkable) {
     const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
-    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a8adb3"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a3b5a6"));
+    const QString checkedBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
+    const QString checkableHoverBg = AppTheme::themed<QString>(QStringLiteral("#3a3d40"), QStringLiteral("#dcf0e2"));
+    const QString normalHoverBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
     QString style = QStringLiteral("#%1 {"
                                    "  background-color: %2;"
                                    "  border: 1px solid %3;"
@@ -72,11 +77,11 @@ QString iconButtonStyle(const QString& objectName, bool checkable) {
                                    "}")
                         .arg(objectName, surface, border);
     if (checkable) {
-        style += QStringLiteral("#%1:hover { background-color: #3a3d40; }"
-                                "#%1:checked { background-color: #314D7A; }")
-                     .arg(objectName);
+        style += QStringLiteral("#%1:hover { background-color: %2; }"
+                                "#%1:checked { background-color: %3; }")
+                     .arg(objectName, checkableHoverBg, checkedBg);
     } else {
-        style += QStringLiteral("#%1:hover { background-color: #314D7A; }").arg(objectName);
+        style += QStringLiteral("#%1:hover { background-color: %2; }").arg(objectName, normalHoverBg);
     }
     return style;
 }

@@ -35,8 +35,8 @@ CustomToolTip::CustomToolTip(QWidget* parent) : QWidget(parent, Qt::ToolTip) {
         QStringLiteral("QLabel { background-color: %1; color: %2; border: 1px solid %3;"
                          " border-radius: 4px; padding: 6px 10px; font-size: 13px; }")
             .arg(AppTheme::themed<QString>(QStringLiteral("#1e1f22"), QStringLiteral("#ffffff")))
-            .arg(AppTheme::themed<QString>(QStringLiteral("#e0e0e0"), QStringLiteral("#1a1b1c")))
-            .arg(AppTheme::themed<QString>(QStringLiteral("#3a3b3c"), QStringLiteral("#c4c7cb")))
+            .arg(AppTheme::themed<QString>(QStringLiteral("#e0e0e0"), QStringLiteral("#1e2621")))
+            .arg(AppTheme::themed<QString>(QStringLiteral("#3a3b3c"), QStringLiteral("#b8c7bb")))
     );
 
     layout->addWidget(textLabel);

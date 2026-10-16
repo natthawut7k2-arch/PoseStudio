@@ -5,8 +5,8 @@
  *
  * Mirror of the dark _environment.qss. Everything is scoped under #EnvironmentPanel /
  * #TransformPanel or the tabs' own object names so it can't leak into other widgets.
- * Palette: pane #ffffff, inputs #ffffff, borders #c4c7cb, accent #5b87cc,
- * hover #dbe6f5, text #33363b.
+ * Palette: pane #ffffff, inputs #ffffff, borders #cad4cc, accent #2e7d4f,
+ * selection #275a3c, hover #dcf0e2, text #1e2621/#334036.
  */
 
 #EnvironmentPanel,
@@ -25,36 +25,36 @@
 /* Row labels: the global QLabel rule is dark/18px — far too big here. Reset to the app's body size. */
 #EnvironmentPanel QLabel,
 #TransformPanel QLabel {
-    color: #4a4e54;
+    color: #47554b;
     font-size: 12px;
     padding: 0;
 }
 /* A row whose dial the selected joint does not have (or no joint selected): the label dims with it. */
-#TransformPanel QLabel:disabled { color: #9aa1a9; }
+#TransformPanel QLabel:disabled { color: #93a096; }
 
 /* The Transform tab's heading (the selected joint's name) and its hint line under the rows. */
 #TransformPanel #TransformJointName {
-    color: #1a1b1c;
+    color: #1e2621;
     font-size: 13px;
     font-weight: bold;
 }
-#TransformPanel #TransformHint { color: #6f747a; }
+#TransformPanel #TransformHint { color: #738276; }
 
 /* Section frames. */
 #PropertyGroup {
-    border: 1px solid #c4c7cb;
+    border: 1px solid #cad4cc;
     border-radius: 5px;
     margin-top: 14px;       /* room for the title sitting on the top border */
     padding: 12px 8px 8px 8px;
     font-size: 12px;
-    color: #33363b;
+    color: #334036;
 }
 #PropertyGroup::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
     left: 8px;
     padding: 0 4px;
-    color: #6f747a;
+    color: #738276;
 }
 
 /* HDRI selector (HdriSelector, hdriselector.cpp): a button showing the current environment's name;
@@ -64,14 +64,14 @@
  * two fields look identical. */
 #EnvironmentHdriButton {
     background-color: #ffffff;
-    color: #1a1b1c;
-    border: 1px solid #a8adb3;
+    color: #1e2621;
+    border: 1px solid #a3b5a6;
     border-radius: 4px;
     padding: 4px 24px 4px 18px; /* generous left inset for the name; right room for the indicator */
     min-height: 20px;
     text-align: left;
 }
-#EnvironmentHdriButton:hover { border-color: #5b87cc; }
+#EnvironmentHdriButton:hover { border-color: #2e7d4f; }
 #EnvironmentHdriButton::menu-indicator {
     subcontrol-origin: padding;
     subcontrol-position: center right;
@@ -85,25 +85,25 @@
  * items, so no rule here. */
 #HdriList {
     background-color: #ffffff;
-    color: #33363b;
+    color: #334036;
     outline: none; /* no dotted focus ring */
 }
 #HdriList::item {
     padding: 2px 6px;   /* tight vertical rhythm between rows */
 }
-#HdriList::item:hover    { background-color: #dbe6f5; color: #1a1b1c; }
-#HdriList::item:selected { background-color: #314D7A; color: #ffffff; }
+#HdriList::item:hover    { background-color: #dcf0e2; color: #1e2621; }
+#HdriList::item:selected { background-color: #275a3c; color: #ffffff; }
 #HdriList QScrollBar:vertical {
     background: #ffffff;
     width: 10px;
     margin: 0;
 }
 #HdriList QScrollBar::handle:vertical {
-    background: #b9bec5;
+    background: #b8c5ba;
     border-radius: 5px;
     min-height: 24px;
 }
-#HdriList QScrollBar::handle:vertical:hover { background: #5b87cc; }
+#HdriList QScrollBar::handle:vertical:hover { background: #2e7d4f; }
 #HdriList QScrollBar::add-line:vertical,
 #HdriList QScrollBar::sub-line:vertical { height: 0; }
 #HdriList QScrollBar::add-page:vertical,
@@ -112,17 +112,17 @@
 /* Footer link under the list: left-justified, quiet, menu-item hover. */
 #HdriFolderLink {
     background: transparent;
-    color: #4a4e54;
+    color: #47554b;
     border: none;
     border-radius: 4px;
     padding: 5px 8px;
     text-align: left;
 }
 #HdriFolderLink:hover {
-    background-color: #dbe6f5;
-    color: #1a1b1c;
+    background-color: #dcf0e2;
+    color: #1e2621;
 }
-#HdriEmptyLabel { color: #6f747a; }
+#HdriEmptyLabel { color: #738276; }
 
 /* Numeric rows are DragNumberBoxes (src/widgets/dragnumberbox.*) — the app-standard scrub field.
  * It paints itself in C++ with DARK defaults, so the light theme MUST re-theme it here via its
@@ -130,10 +130,10 @@
 #TransformPanel DragNumberBox,
 #EnvironmentPanel DragNumberBox {
     qproperty-backgroundColor: #ffffff;
-    qproperty-fillColor: #dbe6f5;
-    qproperty-borderColor: #a8adb3;
-    qproperty-hoverBorderColor: #5b87cc;
-    qproperty-textColor: #1a1b1c;
+    qproperty-fillColor: #dcf0e2;
+    qproperty-borderColor: #a3b5a6;
+    qproperty-hoverBorderColor: #2e7d4f;
+    qproperty-textColor: #1e2621;
 }
 
 /* Per-row restore-default button (the small icon right of each DragNumberBox): quiet until
@@ -144,13 +144,13 @@
     padding: 2px;
     border-radius: 3px;
 }
-#PropertyRowRestore:hover   { background-color: #dbe6f5; }
-#PropertyRowRestore:pressed { background-color: #314D7A; }
+#PropertyRowRestore:hover   { background-color: #dcf0e2; }
+#PropertyRowRestore:pressed { background-color: #275a3c; }
 
 /* The toggles (tonemap, shadows): the label matches the row labels; the indicator itself is the
  * app-wide QCheckBox::indicator rule in global.qss. */
 #EnvironmentPanel QCheckBox {
-    color: #4a4e54;
+    color: #47554b;
     font-size: 12px;
     spacing: 6px;
 }
@@ -158,16 +158,16 @@
 /* Reset button: quiet, secondary. */
 #PropertyResetButton {
     background-color: #ffffff;
-    color: #33363b;
-    border: 1px solid #a8adb3;
+    color: #334036;
+    border: 1px solid #a3b5a6;
     border-radius: 4px;
     padding: 5px 12px;
 }
 #PropertyResetButton:hover {
-    background-color: #314D7A;
+    background-color: #275a3c;
     color: #ffffff;
 }
 #PropertyResetButton:disabled {
-    color: #9aa1a9;
-    border-color: #d5d9de;
+    color: #93a096;
+    border-color: #cad4cc;
 }

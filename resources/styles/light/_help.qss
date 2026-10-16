@@ -14,53 +14,53 @@
    ========================================================================= */
 
 #HelpWindow {
-    background-color: #eef0f2;
+    background-color: #f2f5f3;
 }
 
 #HelpToolbar {
-    background-color: #eef0f2;
-    border-bottom: 1px solid #d3d7dc;
+    background-color: #f2f5f3;
+    border-bottom: 1px solid #d5ded7;
 }
 
 #HelpBack, #HelpForward {
     background-color: #ffffff;
-    color: #1a1b1c;
-    border: 1px solid #c4c7cb;
+    color: #1e2621;
+    border: 1px solid #b8c7bb;
     border-radius: 4px;
     padding: 4px 12px;
 }
 
 #HelpBack:hover, #HelpForward:hover {
-    background-color: #e8ebee;
+    background-color: #ebefe9;
 }
 
 #HelpBack:pressed, #HelpForward:pressed {
-    background-color: #5b87cc;
+    background-color: #2e7d4f;
     color: #ffffff;
 }
 
 #HelpBack:disabled, #HelpForward:disabled {
-    color: #9aa1a9;
-    border-color: #d5d9de;
-    background-color: #e3e6ea;
+    color: #93a096;
+    border-color: #cad4cc;
+    background-color: #e3e9e4;
 }
 
 #HelpSearch {
     background-color: #ffffff;
-    color: #1a1b1c;
-    border: 1px solid #c4c7cb;
+    color: #1e2621;
+    border: 1px solid #b8c7bb;
     border-radius: 4px;
     padding: 4px 8px;
-    selection-background-color: #314d7a;
+    selection-background-color: #275a3c;
     selection-color: #ffffff;
 }
 
 #HelpSearch:hover {
-    border-color: #a8adb3;
+    border-color: #a3b5a6;
 }
 
 #HelpSearch:focus {
-    border-color: #5b87cc;
+    border-color: #2e7d4f;
 }
 
 /* =========================================================================
@@ -68,7 +68,7 @@
    ========================================================================= */
 
 #HelpToc {
-    background-color: #eef0f2;
+    background-color: #f2f5f3;
     border: none;
     outline: 0;
     padding-top: 6px;
@@ -76,24 +76,24 @@
 }
 
 #HelpToc::item {
-    color: #5a5e63;
+    color: #556258;
     padding: 5px 6px;
     border-left: 3px solid transparent;
 }
 
 #HelpToc::item:hover {
-    background-color: #e3e6ea;
-    color: #1a1b1c;
+    background-color: #e3e9e4;
+    color: #1e2621;
 }
 
 #HelpToc::item:selected {
     background-color: #ffffff;
-    color: #1a1b1c;
-    border-left: 3px solid #314d7a;
+    color: #1e2621;
+    border-left: 3px solid #275a3c;
 }
 
 #HelpToc::branch {
-    background-color: #eef0f2;
+    background-color: #f2f5f3;
 }
 
 #HelpToc::branch:has-children:closed {
@@ -110,13 +110,13 @@
 
 #HelpBrowser {
     background-color: #ffffff;
-    color: #24262a;
+    color: #202822;
     border: none;
     font-size: 14px;
-    selection-background-color: #314d7a;
+    selection-background-color: #275a3c;
     selection-color: #ffffff;
 }
 
 #HelpSplitter::handle {
-    background-color: #d3d7dc;
+    background-color: #d5ded7;
 }
