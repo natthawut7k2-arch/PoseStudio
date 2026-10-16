@@ -38,6 +38,10 @@ env:
   # of binaries). To update the pack, upload a new stock-content-v2 release and
   # bump this tag — see docs/RELEASING.md.
   STOCK_CONTENT_TAG: 'stock-content-v1'
+  # The pack release lives on upstream, NOT on ${{ github.repository }}: forks never
+  # publish it, so a fork run downloading from its own repo 404s. Public release
+  # assets need no auth beyond the default github.token.
+  STOCK_CONTENT_REPO: 'PoseStudio/PoseStudio'
 
 jobs:
   build-windows:
@@ -203,7 +207,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist\stock | Out-Null
           gh release download $env:STOCK_CONTENT_TAG `
-            --repo ${{ github.repository }} `
+            --repo "$env:STOCK_CONTENT_REPO" `
             --pattern 'PoseStudio-Stock-HDRIs*.zip' --dir dist\stock
           if ($LASTEXITCODE -ne 0) { throw "Could not download the $env:STOCK_CONTENT_TAG release asset." }
           $zip = Get-ChildItem dist\stock\PoseStudio-Stock-HDRIs*.zip | Select-Object -First 1
