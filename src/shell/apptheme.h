@@ -15,6 +15,7 @@
 
 class QApplication;
 class QString;
+class QWidget;
 
 namespace AppTheme {
 
@@ -57,6 +58,12 @@ Theme themeFromName(const QString& name);
 /// True when the active theme is Light. Hardcoded C++ colors that QSS cannot
 /// reach (tooltips, viewport strip, manual pages) branch on this.
 bool isLightTheme();
+
+/**
+ * @brief Updates the OS-native window frame and title bar (e.g. Windows DWM title bar)
+ *        to match the active theme (Dark or Light).
+ */
+void updateTitleBarTheme(QWidget* window);
 
 /**
  * @brief Picks the per-theme variant of a hardcoded color: @p dark when the

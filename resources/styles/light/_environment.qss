@@ -128,7 +128,13 @@
  * It paints itself in C++ with DARK defaults, so the light theme MUST re-theme it here via its
  * color Q_PROPERTYs — otherwise dark fields with light text sit on the light panel. */
 #TransformPanel DragNumberBox,
-#EnvironmentPanel DragNumberBox {
+#EnvironmentPanel DragNumberBox,
+#TransformPanel pose--DragNumberBox,
+#EnvironmentPanel pose--DragNumberBox,
+#TransformPanel #DragNumberBox,
+#EnvironmentPanel #DragNumberBox,
+pose--DragNumberBox,
+#DragNumberBox {
     qproperty-backgroundColor: #ffffff;
     qproperty-fillColor: #dcf0e2;
     qproperty-borderColor: #a3b5a6;

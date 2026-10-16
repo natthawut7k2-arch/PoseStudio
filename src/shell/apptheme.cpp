@@ -35,6 +35,38 @@ namespace {
  * Installed on the QApplication, so it sees EVERY event in the process: the cheap type test runs
  * first and the qobject_cast only for the two event types it acts on.
  */
+#ifdef Q_OS_WIN
+#include <windows.h>
+
+typedef HRESULT (WINAPI *pfnDwmSetWindowAttribute)(HWND, DWORD, LPCVOID, DWORD);
+
+static void applyNativeTitleBarTheme(QWidget* window, AppTheme::Theme theme) {
+    if (!window) return;
+    HWND hwnd = reinterpret_cast<HWND>(window->winId());
+    if (!hwnd) return;
+
+    HMODULE dwm = GetModuleHandleW(L"dwmapi.dll");
+    if (!dwm) dwm = LoadLibraryW(L"dwmapi.dll");
+    if (!dwm) return;
+
+    auto setAttr = reinterpret_cast<pfnDwmSetWindowAttribute>(GetProcAddress(dwm, "DwmSetWindowAttribute"));
+    if (!setAttr) return;
+
+    const BOOL darkMode = (theme == AppTheme::Theme::Dark);
+    constexpr DWORD kDwmwaUseImmersiveDarkMode = 20;
+    constexpr DWORD kDwmwaUseImmersiveDarkModeOld = 19;
+    setAttr(hwnd, kDwmwaUseImmersiveDarkMode, &darkMode, sizeof(darkMode));
+    setAttr(hwnd, kDwmwaUseImmersiveDarkModeOld, &darkMode, sizeof(darkMode));
+
+    constexpr DWORD kDwmwaCaptionColor = 35;
+    constexpr DWORD kDwmwaTextColor = 36;
+    COLORREF captionColor = darkMode ? RGB(37, 38, 39) : RGB(242, 245, 243);
+    COLORREF textColor = darkMode ? RGB(232, 232, 234) : RGB(30, 38, 33);
+    setAttr(hwnd, kDwmwaCaptionColor, &captionColor, sizeof(captionColor));
+    setAttr(hwnd, kDwmwaTextColor, &textColor, sizeof(textColor));
+}
+#endif
+
 class MenuShadowFilter : public QObject {
 public:
     using QObject::QObject;
@@ -42,6 +74,12 @@ public:
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override {
         const QEvent::Type type = event->type();
+        if (type == QEvent::Show && watched->isWidgetType()) {
+            auto* w = static_cast<QWidget*>(watched);
+            if (w->isWindow()) {
+                AppTheme::updateTitleBarTheme(w);
+            }
+        }
         if (type != QEvent::Polish && type != QEvent::Resize) {
             return QObject::eventFilter(watched, event);
         }
@@ -102,6 +140,9 @@ void repolishAll(QApplication& app) {
         widget->style()->unpolish(widget);
         widget->style()->polish(widget);
         widget->update();
+        if (widget->isWindow()) {
+            AppTheme::updateTitleBarTheme(widget);
+        }
     }
 }
 
@@ -130,6 +171,14 @@ Theme currentTheme() {
 
 bool isLightTheme() {
     return currentTheme() == Theme::Light;
+}
+
+void updateTitleBarTheme(QWidget* window) {
+#ifdef Q_OS_WIN
+    applyNativeTitleBarTheme(window, currentTheme());
+#else
+    Q_UNUSED(window);
+#endif
 }
 
 void install(QApplication& app) {

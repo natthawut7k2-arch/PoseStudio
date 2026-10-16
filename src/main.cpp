@@ -176,6 +176,7 @@ int main(int argc, char *argv[]) {
 
     // --- 4. Execution ---
     mainWindow.show();
+    AppTheme::updateTitleBarTheme(&mainWindow);
 
     // Boot branding screen; dismisses itself on the user's next click anywhere
     SplashOverlay *splash = new SplashOverlay(&mainWindow);

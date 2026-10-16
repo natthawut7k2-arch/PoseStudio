@@ -4,6 +4,7 @@
  */
 
 #include "dragnumberbox.h"
+#include "apptheme.h"
 
 #include <QEvent>
 #include <QFocusEvent>
@@ -31,11 +32,13 @@ constexpr double kCornerRadius = 4.0;
 } // namespace
 
 DragNumberBox::DragNumberBox(QWidget* parent) : QWidget(parent) {
+    setObjectName(QStringLiteral("DragNumberBox"));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setFocusPolicy(Qt::ClickFocus); // so committing the editor has somewhere to return focus
     // Left-right arrow on hover: the affordance that this field scrubs horizontally. (The inline
     // editor is a child QLineEdit with its own I-beam, so edit mode is unaffected.)
     setCursor(Qt::SizeHorCursor);
+    syncThemeColors();
 }
 
 void DragNumberBox::setRange(double min, double max) {
@@ -97,13 +100,24 @@ void DragNumberBox::paintEvent(QPaintEvent*) {
     QPainterPath box;
     box.addRoundedRect(r, kCornerRadius, kCornerRadius);
 
-    p.fillPath(box, m_backgroundColor);
+    const bool enabled = isEnabled();
+    const bool isLight = AppTheme::isLightTheme();
+
+    // When disabled, use a muted background and border so resting fields look natural
+    // and never render as an incongruous pitch black block in light mode.
+    QColor bg = m_backgroundColor;
+    QColor border = m_borderColor;
+    if (!enabled) {
+        bg = isLight ? QColor(0xf5, 0xf7, 0xf5) : QColor(0x23, 0x24, 0x26);
+        border = isLight ? QColor(0xd5, 0xde, 0xd7) : QColor(0x38, 0x39, 0x3b);
+    }
+
+    p.fillPath(box, bg);
 
     // The range fill: from the origin (the left edge, unless setOrigin placed it inside the
     // range) to where the value sits in [min, max]. Clipped to the rounded box so the fill's
     // leading edge stays square while the corners keep the border radius. A disabled box (a
     // parameter that does not apply right now) shows no fill and a dimmed value.
-    const bool   enabled = isEnabled();
     const double range = m_max - m_min;
     const auto   fractionOf = [&](double v) { return (range > 0.0) ? std::clamp((v - m_min) / range, 0.0, 1.0) : 0.0; };
     const double from = m_hasOrigin ? fractionOf(m_origin) : 0.0;
@@ -120,17 +134,17 @@ void DragNumberBox::paintEvent(QPaintEvent*) {
         // the bottom edge, clear of the value's text (which sits on it when the origin is central).
         const double x = std::floor(r.left() + r.width() * from) + 0.5;
         const double tick = std::min(4.0, r.height() / 4.0);
-        p.setPen(QPen(m_borderColor, 1.0));
+        p.setPen(QPen(border, 1.0));
         p.drawLine(QPointF(x, r.top() + 1.0), QPointF(x, r.top() + 1.0 + tick));
         p.drawLine(QPointF(x, r.bottom() - 1.0 - tick), QPointF(x, r.bottom() - 1.0));
     }
 
-    p.setPen(QPen(m_hovered && enabled ? m_hoverBorderColor : m_borderColor, 1.0));
+    p.setPen(QPen(m_hovered && enabled ? m_hoverBorderColor : border, 1.0));
     p.drawPath(box);
 
     QColor text = m_textColor;
     if (!enabled) {
-        text.setAlphaF(0.35f);
+        text = isLight ? QColor(0x93, 0xa0, 0x96) : QColor(0x73, 0x73, 0x75);
     }
     p.setPen(text);
     p.drawText(rect(), Qt::AlignCenter, formattedValue());
@@ -243,6 +257,10 @@ void DragNumberBox::focusOutEvent(QFocusEvent* event) {
 }
 
 void DragNumberBox::changeEvent(QEvent* event) {
+    if (event->type() == QEvent::StyleChange) {
+        syncThemeColors();
+        update();
+    }
     if (event->type() == QEvent::EnabledChange) {
         // Disabled mid-gesture (the thing the box edits went away): end the scrub or the type-in
         // so a listener's bracket closes, and drop the scrub cursor — a disabled box scrubs nothing.
@@ -258,6 +276,22 @@ void DragNumberBox::changeEvent(QEvent* event) {
         update();
     }
     QWidget::changeEvent(event);
+}
+
+void DragNumberBox::syncThemeColors() {
+    if (AppTheme::isLightTheme()) {
+        m_backgroundColor = QColor(0xff, 0xff, 0xff);
+        m_fillColor = QColor(0xdc, 0xf0, 0xe2);
+        m_borderColor = QColor(0xa3, 0xb5, 0xa6);
+        m_hoverBorderColor = QColor(0x2e, 0x7d, 0x4f);
+        m_textColor = QColor(0x1e, 0x26, 0x21);
+    } else {
+        m_backgroundColor = QColor(0x2a, 0x2b, 0x2d);
+        m_fillColor = QColor(0x31, 0x4D, 0x7A);
+        m_borderColor = QColor(0x4a, 0x4b, 0x4d);
+        m_hoverBorderColor = QColor(Constants::COLOR_ACCENT);
+        m_textColor = QColor(0xe0, 0xe0, 0xe0);
+    }
 }
 
 void DragNumberBox::enterEvent(QEnterEvent*) {

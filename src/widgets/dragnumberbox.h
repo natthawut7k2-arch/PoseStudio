@@ -133,6 +133,8 @@ private:
     bool       m_editing = false;
     QLineEdit* m_editor = nullptr; // created lazily on first edit
 
+    void syncThemeColors();
+
     // Painted-look properties (QSS-overridable); defaults match the app palette
     // (see _environment.qss's palette comment). The inline editor's stylesheet is built from
     // these too (beginEdit), so a re-theme covers both looks.
