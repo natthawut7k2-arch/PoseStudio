@@ -14,14 +14,20 @@
 
 #AssetManagerTopPanel {
     background-color: #ffffff;
+    border: 1px solid #cad4cc;
     border-radius: 4px;
 }
 
 #AssetManagerTitle {
-    padding: 10px;
-    color: #334036;
-    font-size: 14px;
+    padding: 8px 10px;
+    color: #1e2621;
+    font-size: 13px;
     font-weight: bold;
+    background-color: #f7faf8;
+    border: 1px solid #cad4cc;
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 /* =========================================================================
@@ -29,12 +35,15 @@
    ========================================================================= */
 
 #AssetManagerSearchRow {
-    background-color: #ffffff;
+    background-color: #f7faf8;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    padding: 3px 6px;
 }
 
 #AssetManagerSearchInput {
     background-color: #ffffff;
-    border: 1px solid #b8c7bb;
+    border: 1px solid #9fb3a3;
     border-radius: 4px;
     color: #1e2621;
     padding: 3px 6px;
@@ -50,28 +59,29 @@
 
 #AssetManagerClearButton,
 #AssetManagerSearchButton {
-    background-color: #edf2ee;
-    border: 1px solid #b8c7bb;
+    background-color: #274733;
+    border: 1px solid #3f6b4e;
     border-radius: 4px;
     padding: 0px;
 }
 
 #AssetManagerClearButton:hover,
 #AssetManagerSearchButton:hover {
-    background-color: #e1e9e2;
+    background-color: #345f44;
+    border-color: #4a7d5b;
 }
 
 #AssetManagerClearButton:pressed,
 #AssetManagerSearchButton:pressed {
-    background-color: #2e7d4f;
-    border-color: #2e7d4f;
+    background-color: #183021;
+    border-color: #183021;
 }
 
 #AssetManagerSearchSeparator {
-    /* The app-wide separator grey (Constants::COLOR_SEPARATOR). */
-    color: #6a6b6e;
-    background-color: #6a6b6e;
+    color: #cad4cc;
+    background-color: #cad4cc;
     max-height: 1px;
+    min-height: 1px;
     border: none;
 }
 
@@ -80,23 +90,24 @@
    ========================================================================= */
 
 #AssetManagerTree {
-    /* The app-wide separator grey (Constants::COLOR_SEPARATOR, QMenu::separator in
-       _menumanager.qss), injected into the C++ delegate's separator rows via Q_PROPERTY. */
-    qproperty-separatorColor: #6a6b6e;
+    /* The separator colour injected into the C++ delegate's separator rows via Q_PROPERTY */
+    qproperty-separatorColor: #cad4cc;
     padding: 4px;
     background-color: #ffffff;
     border: none;
-    border-radius: 4px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
     outline: none; /* Removes the dotted focus ring */
-    color: #334036;
+    color: #1e2621;
 }
 
 #AssetManagerTree::item {
     padding: 4px;
+    border-radius: 3px;
 }
 
 #AssetManagerTree::item:hover {
-    background-color: #ebf5ee;
+    background-color: #edf5ef;
 }
 
 #AssetManagerTree::item:selected {
@@ -110,9 +121,12 @@
 
 #AssetManagerGrid {
     padding: 8px;
-    background-color: #f2f5f3;
+    background-color: #ffffff;
     border: 1px solid #cad4cc;
-    border-radius: 4px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
     outline: none;
 }
 
@@ -121,12 +135,12 @@
     background-color: transparent;
     border: 1px solid transparent; /* This prevents the 1px jitter! */
     border-radius: 6px;
-    color: #556258;
+    color: #47554b;
 }
 
 #AssetManagerGrid::item:hover {
-    background-color: #ffffff;
-    border: 1px solid #b8c7bb;
+    background-color: #f0f6f2;
+    border: 1px solid #9fb3a3;
     color: #1e2621;
 }
 

@@ -55,6 +55,8 @@
 #include <functional>
 #include <utility>
 
+#include "apptheme.h"
+
 using AssetScan::AssetHit;
 
 namespace {
@@ -187,8 +189,9 @@ void AssetManagerWidget::setupUI() {
     addLibraryHintLabel->setTextFormat(Qt::RichText);
     // Qt's QSS engine doesn't apply selectors to rich-text <a> links inside a QLabel, so the
     // link colour is inline in the HTML.
-    addLibraryHintLabel->setText(tr("<a href=\"#\" style=\"color: #ffffff;\">%1</a>")
-                                  .arg(tr("Add Asset Folder")));
+    const QString hintLinkColor = AppTheme::themed<QString>(QStringLiteral("#ffffff"), QStringLiteral("#2e7d4f"));
+    addLibraryHintLabel->setText(tr("<a href=\"#\" style=\"color: %1;\">%2</a>")
+                                  .arg(hintLinkColor, tr("Add Asset Folder")));
     addLibraryHintLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse);
     addLibraryHintLabel->setCursor(Qt::PointingHandCursor);
     addLibraryHintLabel->hide();

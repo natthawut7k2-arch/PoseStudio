@@ -41,7 +41,7 @@ QString pickerStyle(const QString& objectName, int minWidthPx) {
     // theme switch applies to strips created afterwards — existing strips repolish via AppTheme.
     const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
     const QString text = AppTheme::themed<QString>(QStringLiteral("#e8e8ea"), QStringLiteral("#1e2621"));
-    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a3b5a6"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#7d9482"));
     const QString hoverBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
     return QStringLiteral("#%1 {"
                           "  background-color: %2;"
@@ -61,15 +61,16 @@ QString pickerStyle(const QString& objectName, int minWidthPx) {
         .arg(hoverBg);
 }
 
-// The icon buttons' style: the same surface/hover as the picker fields so the strip reads as
-// one control. A checkable button (Skeleton) shows its state in the accent and takes a quieter
-// hover so the two states stay distinguishable.
+// The icon buttons' style: in dark mode, the surface is #252627. In light mode, because the
+// embedded icons (home.png, ground.png, skeleton.png) are white/light glyphs, a white button
+// background makes them invisible. A dark forest green chip (#274733) gives high contrast,
+// matches the green theme palette, and makes all icon glyphs crisp and legible.
 QString iconButtonStyle(const QString& objectName, bool checkable) {
-    const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
-    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a3b5a6"));
-    const QString checkedBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
-    const QString checkableHoverBg = AppTheme::themed<QString>(QStringLiteral("#3a3d40"), QStringLiteral("#dcf0e2"));
-    const QString normalHoverBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#275a3c"));
+    const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#274733"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#3f6b4e"));
+    const QString checkedBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#183021"));
+    const QString checkableHoverBg = AppTheme::themed<QString>(QStringLiteral("#3a3d40"), QStringLiteral("#345f44"));
+    const QString normalHoverBg = AppTheme::themed<QString>(QStringLiteral("#314D7A"), QStringLiteral("#345f44"));
     QString style = QStringLiteral("#%1 {"
                                    "  background-color: %2;"
                                    "  border: 1px solid %3;"

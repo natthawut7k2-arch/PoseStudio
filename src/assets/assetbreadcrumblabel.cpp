@@ -5,6 +5,7 @@
 
 #include "assetbreadcrumblabel.h"
 #include "assetscan.h"
+#include "apptheme.h"
 
 #include <QAction>
 #include <QContextMenuEvent>
@@ -147,20 +148,25 @@ QString AssetBreadcrumbLabel::buildBreadcrumbHtml(int availableWidth) const {
     curFont.setPixelSize(16);
     const QFontMetrics curFm(curFont);
 
+    const QString linkCol = AppTheme::themed<QString>(QStringLiteral("#6e6e6e"), QStringLiteral("#4a5e50"));
+    const QString linkHoverCol = AppTheme::themed<QString>(QStringLiteral("#aaaaaa"), QStringLiteral("#1b5e34"));
+    const QString sepCol = AppTheme::themed<QString>(QStringLiteral("#6e6e6e"), QStringLiteral("#8fa694"));
+    const QString curCol = AppTheme::themed<QString>(QStringLiteral("#cccccc"), QStringLiteral("#1e2621"));
+
     auto linkStyle = [&](const QString& path) -> QString {
         const bool hovered = (!m_hoveredLink.isEmpty() && path == m_hoveredLink);
         return hovered
-            ? "font-size:14px; font-weight:bold; color:#aaaaaa; text-decoration:underline;"
-            : "font-size:14px; font-weight:bold; color:#6e6e6e; text-decoration:none;";
+            ? QStringLiteral("font-size:14px; font-weight:bold; color:%1; text-decoration:underline;").arg(linkHoverCol)
+            : QStringLiteral("font-size:14px; font-weight:bold; color:%1; text-decoration:none;").arg(linkCol);
     };
-    const QString greySep = "<span style='color:#6e6e6e; font-weight:bold;'> / </span>";
+    const QString greySep = QStringLiteral("<span style='color:%1; font-weight:bold;'> / </span>").arg(sepCol);
     const int sepWidth = linkFm.horizontalAdvance(QStringLiteral(" / "));
 
     // No segments: the library root itself is the current folder.
     if (m_segments.isEmpty()) {
         const QString elidedName = curFm.elidedText(m_libName, Qt::ElideLeft, availableWidth);
-        return QString("&nbsp;<span style='font-size:16px; font-weight:bold; color:#cccccc;'>%1</span>")
-                    .arg(elidedName.toHtmlEscaped());
+        return QString("&nbsp;<span style='font-size:16px; font-weight:bold; color:%1;'>%2</span>")
+                    .arg(curCol, elidedName.toHtmlEscaped());
     }
 
     // The last segment (current folder) is always shown in full, bright, non-link.
@@ -194,7 +200,7 @@ QString AssetBreadcrumbLabel::buildBreadcrumbHtml(int availableWidth) const {
         html += QString("<a href=\"%1\" style='%2'>%3</a>")
                     .arg(m_libRoot.toHtmlEscaped(), linkStyle(m_libRoot), m_libName.toHtmlEscaped());
     } else {
-        html += "<span style='font-size:14px; font-weight:bold; color:#6e6e6e;'>...</span>";
+        html += QString("<span style='font-size:14px; font-weight:bold; color:%1;'>...</span>").arg(sepCol);
     }
 
     for (int idx : shownIndices) {
@@ -205,8 +211,8 @@ QString AssetBreadcrumbLabel::buildBreadcrumbHtml(int availableWidth) const {
     }
 
     html += greySep;
-    html += QString("<span style='font-size:16px; font-weight:bold; color:#cccccc;'>%1</span>")
-                .arg(elidedLast.toHtmlEscaped());
+    html += QString("<span style='font-size:16px; font-weight:bold; color:%1;'>%2</span>")
+                .arg(curCol, elidedLast.toHtmlEscaped());
 
     return html;
 }

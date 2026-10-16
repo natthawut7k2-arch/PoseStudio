@@ -117,6 +117,8 @@ crash_dumps/
 
 # Editor/assistant scratch directories (agent worktrees, session data) — never publish
 .claude/
+.ua/
+CLAUDE_gd.md
 
 # ------------------------------------------
 # IK harness skeleton dumps (POSESTUDIO_DUMP_SKELETON) are a figure vendor's rig data

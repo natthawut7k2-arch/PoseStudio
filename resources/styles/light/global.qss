@@ -30,23 +30,27 @@ QLabel {
 /* ========================================================================= */
 
 QSplitter::handle {
-    /* Subtle separation between main UI panels */
-    background-color: #d5ded7;
+    /* Clear separation between main UI panels */
+    background-color: #b8c7bb;
 }
 
 QSplitter::handle:horizontal {
-    width: 6px;
+    width: 5px;
+    border-left: 1px solid #a3b5a6;
+    border-right: 1px solid #a3b5a6;
 }
 
 QSplitter::handle:vertical {
-    height: 4px;
+    height: 5px;
+    border-top: 1px solid #a3b5a6;
+    border-bottom: 1px solid #a3b5a6;
 }
 
 /* --- Splitter Interactions --- */
 
 QSplitter::handle:hover {
-    /* Slightly darken the handle so the user knows it can be dragged */
-    background-color: #b8c5ba;
+    /* Darken the handle so the user knows it can be dragged */
+    background-color: #7d9683;
 }
 
 QSplitter::handle:pressed {
@@ -59,18 +63,18 @@ QSplitter::handle:pressed {
 /* ========================================================================= */
 
 QTabWidget::pane {
-    /* Remove native 3D borders from the Fusion style to keep it flat */
-    border: none;
+    /* Flat container panel with a clean border */
+    border: 1px solid #cad4cc;
     background-color: #ffffff;
 }
 
 QTabBar::tab {
-    background-color: #e3e9e4;
-    color: #556258;
+    background-color: #e2e8e3;
+    color: #47554b;
     padding: 12px 6px;
 
     /* Establish the boundary between unselected tabs */
-    border: 1px solid #cad4cc;
+    border: 1px solid #b8c7bb;
     border-right: none;
 
     /* Soften the outer edge (assumes West-aligned tabs) */
@@ -82,14 +86,19 @@ QTabBar::tab {
 /* --- Tab Interactions --- */
 
 QTabBar::tab:selected {
-    /* Active tab blends seamlessly into the QTabWidget pane color */
+    /* Active tab with green accent border indicator */
     background-color: #ffffff;
     color: #1e2621;
+    border: 1px solid #cad4cc;
+    border-right: none;
+    border-left: 3px solid #2e7d4f;
+    font-weight: bold;
 }
 
 QTabBar::tab:hover:!selected {
-    /* Subtle highlight for inactive tabs when moused over */
-    background-color: #ebefe9;
+    /* Clear highlight for inactive tabs when moused over */
+    background-color: #edf3ee;
+    color: #1e2621;
 }
 
 /* ========================================================================= */
