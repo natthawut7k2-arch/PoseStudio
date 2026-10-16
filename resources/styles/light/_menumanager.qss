@@ -1,0 +1,75 @@
+/**
+ * @file light/_menumanager.qss
+ * @brief Light theme: the menu bar and EVERY QMenu in the app (dropdowns, context menus,
+ *        and the viewport/Environment picker menus).
+ *
+ * Mirror of the dark _menumanager.qss. The 4px border-radius MUST stay 4px: MenuShadowFilter
+ * (shell/apptheme.cpp) masks every popup to that radius, so a different value leaves opaque
+ * corner specks. Separator grey stays the shared Constants::COLOR_SEPARATOR value.
+ */
+
+/* =========================================================================
+   [ MENU BAR ]
+   ========================================================================= */
+
+QMenuBar {
+    padding: 4px;
+    border-bottom: 1px solid #d3d7dc;
+    background-color: #eef0f2;
+    color: #1a1b1c;
+}
+
+QMenuBar::item {
+    padding: 6px 12px;
+    /* A transparent background (and matching radius) forces this base state through the same
+       stylesheet box rendering as :selected below. Without it, the unstyled base renders
+       natively while the hovered state renders via the stylesheet, and the two paths lay the
+       text out slightly differently — the "font changes / shifts on hover" artifact. */
+    background-color: transparent;
+    border-radius: 4px;
+}
+
+QMenuBar::item:selected {
+    border-radius: 4px;
+    background-color: #314D7A;
+    color: #ffffff;
+}
+
+/* =========================================================================
+   [ DROPDOWN MENUS ]
+   ========================================================================= */
+
+/* Rounded corners make a QMenu a *translucent* popup window, which on Windows gets a heavy native drop
+   shadow. We keep the rounded corners and instead strip that shadow app-wide via MenuShadowFilter in
+   shell/apptheme.cpp (it sets Qt::NoDropShadowWindowHint on every menu and masks the popup to the
+   4px radius below). Result: rounded corners, no shadow. Change the radius here and there together. */
+QMenu {
+    padding: 4px;
+    border: 1px solid #b9bec5;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #1a1b1c;
+}
+
+QMenu::item {
+    padding: 6px 4px 6px 6px;
+}
+
+QMenu::item:selected {
+    border-radius: 4px;
+    background-color: #314D7A;
+    color: #ffffff;
+}
+
+QMenu::item:disabled {
+    color: #9aa1a9;
+}
+
+/* Separators between item groups — EVERY QMenu in the app. The same grey
+   (Constants::COLOR_SEPARATOR) draws the Asset Manager's section and search dividers and the
+   HDRI menu's category rules — one separator colour app-wide. */
+QMenu::separator {
+    height: 1px;
+    background: #6a6b6e;
+    margin: 5px 8px 5px 8px;
+}

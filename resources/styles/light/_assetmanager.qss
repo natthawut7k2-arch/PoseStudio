@@ -1,0 +1,181 @@
+/**
+ * @file light/_assetmanager.qss
+ * @brief Light theme: the Asset Manager tab (src/assets/*).
+ *
+ * Mirror of the dark _assetmanager.qss. Grid thumbnails themselves keep their dark
+ * canvas (Constants::COLOR_THUMB_BG_*) so artwork previews read identically; only the
+ * surrounding chrome goes light. Selection fill stays #314d7A with white text, shared
+ * with the dark theme.
+ */
+
+/* =========================================================================
+   [ TOP PANEL & HEADER ]
+   ========================================================================= */
+
+#AssetManagerTopPanel {
+    background-color: #ffffff;
+    border-radius: 4px;
+}
+
+#AssetManagerTitle {
+    padding: 10px;
+    color: #33363b;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* =========================================================================
+   [ SEARCH BAR ]
+   ========================================================================= */
+
+#AssetManagerSearchRow {
+    background-color: #ffffff;
+}
+
+#AssetManagerSearchInput {
+    background-color: #ffffff;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    color: #1a1b1c;
+    padding: 3px 6px;
+    font-size: 12px;
+    selection-background-color: #314d7a;
+    selection-color: #ffffff;
+}
+
+#AssetManagerSearchInput:focus {
+    border: 1px solid #5b87cc;
+    outline: none;
+}
+
+#AssetManagerClearButton,
+#AssetManagerSearchButton {
+    background-color: #e8ebee;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    padding: 0px;
+}
+
+#AssetManagerClearButton:hover,
+#AssetManagerSearchButton:hover {
+    background-color: #dfe3e8;
+}
+
+#AssetManagerClearButton:pressed,
+#AssetManagerSearchButton:pressed {
+    background-color: #5b87cc;
+    border-color: #5b87cc;
+}
+
+#AssetManagerSearchSeparator {
+    /* The app-wide separator grey (Constants::COLOR_SEPARATOR). */
+    color: #6a6b6e;
+    background-color: #6a6b6e;
+    max-height: 1px;
+    border: none;
+}
+
+/* =========================================================================
+   [ DIRECTORY TREE ]
+   ========================================================================= */
+
+#AssetManagerTree {
+    /* The app-wide separator grey (Constants::COLOR_SEPARATOR, QMenu::separator in
+       _menumanager.qss), injected into the C++ delegate's separator rows via Q_PROPERTY. */
+    qproperty-separatorColor: #6a6b6e;
+    padding: 4px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    outline: none; /* Removes the dotted focus ring */
+    color: #33363b;
+}
+
+#AssetManagerTree::item {
+    padding: 4px;
+}
+
+#AssetManagerTree::item:hover {
+    background-color: #e8ebee;
+}
+
+#AssetManagerTree::item:selected {
+    background-color: #314d7a;
+    color: #ffffff;
+}
+
+/* =========================================================================
+   [ ASSET GRID ]
+   ========================================================================= */
+
+#AssetManagerGrid {
+    padding: 8px;
+    background-color: #eef0f2;
+    border: 1px solid #d5d9de;
+    border-radius: 4px;
+    outline: none;
+}
+
+#AssetManagerGrid::item {
+    padding: 4px;
+    background-color: transparent;
+    border: 1px solid transparent; /* This prevents the 1px jitter! */
+    border-radius: 6px;
+    color: #5a5e63;
+}
+
+#AssetManagerGrid::item:hover {
+    background-color: #ffffff;
+    border: 1px solid #c4c7cb;
+    color: #1a1b1c;
+}
+
+#AssetManagerGrid::item:selected {
+    background-color: #dbe6f5; /* Light selection wash */
+    border: 1px solid #5b87cc; /* App accent border */
+    color: #1a1b1c;
+}
+
+/* =========================================================================
+   [ INFO BAR FOOTER ]
+   ========================================================================= */
+
+#AssetManagerInfoBar {
+    padding: 0px 4px 8px 12px;
+    color: #5a5e63;
+    font-size: 12px;
+}
+
+#AssetManagerAddLibraryHint {
+    font-size: 14px;
+}
+
+/* ========================================================================= */
+/* ASSET MANAGER CONTEXT MENU                                                */
+/* ========================================================================= */
+
+QMenu#AssetManagerContextMenu {
+    border: 1px solid #c4c7cb;
+    background-color: #ffffff; /* Matches the light theme */
+    icon-size: 12px;
+}
+
+QMenu#AssetManagerContextMenu::item {
+    padding: 5px 25px 5px 10px;
+    color: #1a1b1c;
+}
+
+QMenu#AssetManagerContextMenu::item:selected {
+    background-color: #e8ebee; /* Highlight color on hover */
+}
+
+QMenu#AssetManagerContextMenu::icon {
+    padding-left: 12px;
+}
+
+/* Separators: the global QMenu::separator rule (_menumanager.qss) — one colour app-wide. */
+
+QMenu#AssetManagerContextMenu::item:disabled {
+    color: #9aa1a9; /* Muted, greyed-out text */
+    background-color: transparent; /* Ensures it doesn't highlight on hover */
+}

@@ -8,6 +8,12 @@
         <file>styles/_preferences.qss</file>
         <file>styles/_environment.qss</file>
         <file>styles/_help.qss</file>
+        <file>styles/light/global.qss</file>
+        <file>styles/light/_assetmanager.qss</file>
+        <file>styles/light/_menumanager.qss</file>
+        <file>styles/light/_preferences.qss</file>
+        <file>styles/light/_environment.qss</file>
+        <file>styles/light/_help.qss</file>
         
         <file>database/initialize.sql</file>
 

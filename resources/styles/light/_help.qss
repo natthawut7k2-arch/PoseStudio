@@ -1,0 +1,122 @@
+/**
+ * @file light/_help.qss
+ * @brief Light theme: the User Manual window (src/help/helpwindow.cpp) — toolbar,
+ *        contents tree and page browser.
+ *
+ * Mirror of the dark _help.qss. The PAGE's own typography (heading colours, links, code,
+ * tables) is not QSS — HelpManual::render sets it (helpmanual.cpp), which branches on
+ * AppTheme::isLightTheme(); only the browser's body text colour, background and font
+ * come from here. Keep the two in step.
+ */
+
+/* =========================================================================
+   [ WINDOW + TOOLBAR ]
+   ========================================================================= */
+
+#HelpWindow {
+    background-color: #eef0f2;
+}
+
+#HelpToolbar {
+    background-color: #eef0f2;
+    border-bottom: 1px solid #d3d7dc;
+}
+
+#HelpBack, #HelpForward {
+    background-color: #ffffff;
+    color: #1a1b1c;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    padding: 4px 12px;
+}
+
+#HelpBack:hover, #HelpForward:hover {
+    background-color: #e8ebee;
+}
+
+#HelpBack:pressed, #HelpForward:pressed {
+    background-color: #5b87cc;
+    color: #ffffff;
+}
+
+#HelpBack:disabled, #HelpForward:disabled {
+    color: #9aa1a9;
+    border-color: #d5d9de;
+    background-color: #e3e6ea;
+}
+
+#HelpSearch {
+    background-color: #ffffff;
+    color: #1a1b1c;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    padding: 4px 8px;
+    selection-background-color: #314d7a;
+    selection-color: #ffffff;
+}
+
+#HelpSearch:hover {
+    border-color: #a8adb3;
+}
+
+#HelpSearch:focus {
+    border-color: #5b87cc;
+}
+
+/* =========================================================================
+   [ CONTENTS TREE ]  — the Preferences nav's look: an accent bar marks the page shown
+   ========================================================================= */
+
+#HelpToc {
+    background-color: #eef0f2;
+    border: none;
+    outline: 0;
+    padding-top: 6px;
+    font-size: 13px;
+}
+
+#HelpToc::item {
+    color: #5a5e63;
+    padding: 5px 6px;
+    border-left: 3px solid transparent;
+}
+
+#HelpToc::item:hover {
+    background-color: #e3e6ea;
+    color: #1a1b1c;
+}
+
+#HelpToc::item:selected {
+    background-color: #ffffff;
+    color: #1a1b1c;
+    border-left: 3px solid #314d7a;
+}
+
+#HelpToc::branch {
+    background-color: #eef0f2;
+}
+
+#HelpToc::branch:has-children:closed {
+    image: url(:/resources/icons/expand.png);
+}
+
+#HelpToc::branch:has-children:open {
+    image: url(:/resources/icons/collapse.png);
+}
+
+/* =========================================================================
+   [ PAGE BROWSER ]
+   ========================================================================= */
+
+#HelpBrowser {
+    background-color: #ffffff;
+    color: #24262a;
+    border: none;
+    font-size: 14px;
+    selection-background-color: #314d7a;
+    selection-color: #ffffff;
+}
+
+#HelpSplitter::handle {
+    background-color: #d3d7dc;
+}

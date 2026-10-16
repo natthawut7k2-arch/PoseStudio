@@ -412,9 +412,11 @@ add_executable(
     src/preferences/preferencespanel.h
     src/preferences/generalpreferencespanel.cpp
     src/preferences/generalpreferencespanel.h
+    src/preferences/interfacepreferencespanel.cpp # appearance theme choice (dark/light)
+    src/preferences/interfacepreferencespanel.h
     src/preferences/assetspreferencespanel.cpp
     src/preferences/assetspreferencespanel.h
-    src/preferences/placeholderpreferencespanel.cpp # one class for every not-yet-built tab (Interface/Input/Navigation/System)
+    src/preferences/placeholderpreferencespanel.cpp # one class for every not-yet-built tab (Input/Navigation/System)
     src/preferences/placeholderpreferencespanel.h
     src/preferences/factoryresetpreferencespanel.cpp
     src/preferences/factoryresetpreferencespanel.h

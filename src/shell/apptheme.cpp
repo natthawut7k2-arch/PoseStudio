@@ -1,10 +1,12 @@
 /**
  * @file apptheme.cpp
- * @brief Implementation of AppTheme::install — the app's theming, moved out of main.cpp.
+ * @brief Implementation of AppTheme::install / applyTheme — the app's theming.
  */
 
 #include "apptheme.h"
 #include "appproxystyle.h"
+#include "constants.h"
+#include "preferencesmanager.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -16,6 +18,8 @@
 #include <QRegion>
 #include <QString>
 #include <QStringList>
+#include <QStyle>
+#include <QWidget>
 
 namespace {
 /**
@@ -25,7 +29,8 @@ namespace {
  * gives a heavy native drop shadow. Setting Qt::NoDropShadowWindowHint on each menu removes that shadow
  * while keeping the rounded corners. It's applied on the menu's Polish event — before its native window
  * is created, so the shadow never appears — which covers menu-bar dropdowns, their submenus, context
- * menus, and the viewport's shader menu alike, from one place.
+ * menus, and the viewport's shader menu alike, from one place. Theme-independent: both the dark
+ * and the light menu styles keep the same 4px radius, so the mask matches either way.
  *
  * Installed on the QApplication, so it sees EVERY event in the process: the cheap type test runs
  * first and the qobject_cast only for the two event types it acts on.
@@ -62,20 +67,22 @@ protected:
 
 /**
  * @brief Concatenates the app's QSS modules into one stylesheet, in cascade order
- *        (later files can override rules from earlier ones).
+ *        (later files can override rules from earlier ones). The dark and light
+ *        sets mirror the same module structure; only the palette differs.
  */
-QString loadStylesheets() {
-    QString combinedStyles;
-
+QString loadStylesheets(AppTheme::Theme theme) {
+    const QString subdir = (theme == AppTheme::Theme::Light)
+        ? QStringLiteral("light/") : QString();
     const QStringList filesToLoad = {
-        QStringLiteral(":/resources/styles/global.qss"),
-        QStringLiteral(":/resources/styles/_assetmanager.qss"),
-        QStringLiteral(":/resources/styles/_menumanager.qss"),
-        QStringLiteral(":/resources/styles/_preferences.qss"),
-        QStringLiteral(":/resources/styles/_environment.qss"),
-        QStringLiteral(":/resources/styles/_help.qss")
+        QStringLiteral(":/resources/styles/%1global.qss").arg(subdir),
+        QStringLiteral(":/resources/styles/%1_assetmanager.qss").arg(subdir),
+        QStringLiteral(":/resources/styles/%1_menumanager.qss").arg(subdir),
+        QStringLiteral(":/resources/styles/%1_preferences.qss").arg(subdir),
+        QStringLiteral(":/resources/styles/%1_environment.qss").arg(subdir),
+        QStringLiteral(":/resources/styles/%1_help.qss").arg(subdir)
     };
 
+    QString combinedStyles;
     for (const QString& filePath : filesToLoad) {
         QFile file(filePath);
         if (file.open(QFile::ReadOnly | QFile::Text)) {
@@ -86,9 +93,46 @@ QString loadStylesheets() {
     }
     return combinedStyles;
 }
+
+/// Re-polishes every live widget so a runtime theme switch takes effect without
+/// recreating the window. Setting a new stylesheet alone only affects widgets
+/// polished afterwards; unpolish/polish forces the whole tree onto the new rules.
+void repolishAll(QApplication& app) {
+    for (QWidget* widget : app.allWidgets()) {
+        widget->style()->unpolish(widget);
+        widget->style()->polish(widget);
+        widget->update();
+    }
+}
+
 } // namespace
 
-void AppTheme::install(QApplication& app) {
+namespace AppTheme {
+
+Theme themeFromName(const QString& name) {
+    if (name == QLatin1String(Constants::THEME_LIGHT)) {
+        return Theme::Light;
+    }
+    return Theme::Dark;
+}
+
+QString themeName(Theme theme) {
+    return (theme == Theme::Light) ? QLatin1String(Constants::THEME_LIGHT)
+                                   : QLatin1String(Constants::THEME_DARK);
+}
+
+Theme currentTheme() {
+    const QString saved = PreferencesManager::instance()
+        .getValue(QLatin1String(Constants::PREF_APPEARANCE_THEME),
+                  QLatin1String(Constants::THEME_DARK)).toString();
+    return themeFromName(saved);
+}
+
+bool isLightTheme() {
+    return currentTheme() == Theme::Light;
+}
+
+void install(QApplication& app) {
     app.setWindowIcon(QIcon(QStringLiteral(":/resources/icon.png")));
 
     // Disable the OS-level slide/fade animations for all tooltips (the asset grid uses a
@@ -96,15 +140,24 @@ void AppTheme::install(QApplication& app) {
     QApplication::setEffectEnabled(Qt::UI_AnimateTooltip, false);
     QApplication::setEffectEnabled(Qt::UI_FadeTooltip, false);
 
-    // AppProxyStyle layered over Fusion: forces the custom dark theme to render identically on
+    // AppProxyStyle layered over Fusion: forces the custom theme to render identically on
     // every platform (never the native OS style), and adds app-wide tweaks (tooltip delays,
     // submenu overlap, dimmed disabled icons). The proxy takes ownership of the Fusion base.
     // "Fusion" must be passed explicitly — a bare AppProxyStyle() would wrap the platform
     // DEFAULT style instead, silently defeating the point.
     app.setStyle(new AppProxyStyle(QStringLiteral("Fusion")));
-    app.setStyleSheet(loadStylesheets());
+    app.setStyleSheet(loadStylesheets(currentTheme()));
 
     // Strip the native drop shadow from every popup menu app-wide, keeping their rounded corners
     // (see MenuShadowFilter). Parented to the app so it lives for the whole session.
     app.installEventFilter(new MenuShadowFilter(&app));
 }
+
+void applyTheme(QApplication& app, Theme theme) {
+    PreferencesManager::instance().setValue(
+        QLatin1String(Constants::PREF_APPEARANCE_THEME), themeName(theme));
+    app.setStyleSheet(loadStylesheets(theme));
+    repolishAll(app);
+}
+
+} // namespace AppTheme

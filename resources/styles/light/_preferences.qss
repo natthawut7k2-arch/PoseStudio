@@ -1,0 +1,176 @@
+/**
+ * @file light/_preferences.qss
+ * @brief Light theme: the Preferences dialog (src/preferences/*).
+ *
+ * Mirror of the dark _preferences.qss. Scoped by object name (#PreferencesNav,
+ * #PreferencesPanel, ...) so nothing leaks into the main window. The Interface page's
+ * theme radio rows reuse the app-wide QCheckBox::indicator rule from light/global.qss.
+ */
+
+/* =========================================================================
+   [ PREFERENCES DIALOG ]
+   Vertical tab nav (left) driving a stack of panels (right).
+   ========================================================================= */
+
+#PreferencesNav {
+    background-color: #eef0f2;
+    border: none;
+    outline: 0;
+    padding-top: 8px;
+}
+
+#PreferencesNav::item {
+    color: #5a5e63;
+    padding: 10px 16px;
+    border-left: 3px solid transparent; /* reserves space so selection doesn't shift text */
+}
+
+#PreferencesNav::item:hover {
+    background-color: #e3e6ea;
+    color: #1a1b1c;
+}
+
+#PreferencesNav::item:selected {
+    background-color: #ffffff;        /* matches the panel area, so the tab "connects" to it */
+    color: #1a1b1c;
+    border-left: 3px solid #314d7a;   /* accent marker — matches the Asset Manager selection blue */
+}
+
+/* =========================================================================
+   [ PANEL AREA ]
+   ========================================================================= */
+
+#PreferencesPanel {
+    background-color: #ffffff;
+}
+
+#PreferencesPanelHeading {
+    color: #1a1b1c;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#PreferencesPlaceholder {
+    color: #6f747a;
+    font-size: 13px;
+}
+
+#PreferencesDescription {
+    color: #5a5e63;
+    font-size: 12px;
+}
+
+/* =========================================================================
+   [ CHECKBOXES / RADIOS — e.g. the Interface page's theme choice ]
+   The indicator is the app-wide rule in light/global.qss; only the label
+   differs — matching the General page's ping toggle copy.
+   ========================================================================= */
+
+#PreferencesPanel QCheckBox,
+#PreferencesPanel QRadioButton {
+    color: #33363b;
+    font-size: 13px;
+    spacing: 6px;
+}
+
+#PreferencesPanel QRadioButton::indicator {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #a8adb3;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+#PreferencesPanel QRadioButton::indicator:hover {
+    border-color: #5b87cc;
+}
+
+#PreferencesPanel QRadioButton::indicator:checked {
+    background: #5b87cc;
+    border-color: #5b87cc;
+}
+
+/* =========================================================================
+   [ ASSET LIBRARY LIST — "Assets" tab ]
+
+   Mirrors #AssetManagerTree's item styling exactly so the two select/hover identically.
+   Crucially, no `border` is set on ::item — declaring one (even `border: none`) flips Qt to
+   full CSS box-model rendering, which inflates the selection rect and overlaps adjacent rows.
+   Source order also matters: :selected comes after :hover so it wins when a row is both. */
+#AssetLibraryList {
+    background-color: #ffffff;
+    color: #33363b;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    outline: none;
+}
+
+#AssetLibraryList::item {
+    /* No padding here: on the default (non-custom) item delegate, QSS padding inflates the
+       drawn selection/hover box beyond the item's layout rect, which both makes the highlight
+       look oversized and leaves clipping artifacts when an adjacent row repaints on hover.
+       Row height is instead set via each item's sizeHint in C++ (see reloadLibraries). */
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+#AssetLibraryList::item:hover {
+    background-color: #e8ebee;
+}
+
+#AssetLibraryList::item:selected {
+    background-color: #314d7a;
+    color: #ffffff;
+}
+
+/* =========================================================================
+   [ FACTORY RESET CONFIRM INPUT — plain input, no native focus glow/hover ]
+   ========================================================================= */
+
+#FactoryResetConfirmInput {
+    background-color: #ffffff;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    color: #1a1b1c;
+    padding: 4px 6px;
+    font-size: 12px;
+    selection-background-color: #314d7a;
+    selection-color: #ffffff;
+}
+
+#FactoryResetConfirmInput:hover {
+    background-color: #ffffff;
+    border: 1px solid #c4c7cb;
+}
+
+#FactoryResetConfirmInput:focus {
+    border: 1px solid #c4c7cb;
+    outline: 0;
+}
+
+/* =========================================================================
+   [ FACTORY RESET BUTTON — themed in the app's accent blue ]
+   ========================================================================= */
+
+#FactoryResetButton {
+    background-color: #3a5a8c;
+    color: #ffffff;
+    border: 1px solid #5b87cc;
+    border-radius: 4px;
+    padding: 6px 16px;
+    min-width: 70px;
+}
+
+#FactoryResetButton:hover {
+    background-color: #46689e;
+}
+
+#FactoryResetButton:pressed {
+    background-color: #5b87cc;
+}
+
+#FactoryResetButton:disabled {
+    background-color: #e3e6ea;
+    color: #9aa1a9;
+    border: 1px solid #c4c7cb;
+}

@@ -4,6 +4,7 @@
  */
 
 #include "customtooltip.h"
+#include "apptheme.h"
 #include "constants.h"
 
 #include <QEnterEvent>
@@ -27,15 +28,15 @@ CustomToolTip::CustomToolTip(QWidget* parent) : QWidget(parent, Qt::ToolTip) {
     layout->setContentsMargins(0, 0, 0, 0);
 
     textLabel = new QLabel(this);
+    // Theme-aware: the same tooltip surface as QToolTip in global.qss (dark #1e1f22,
+    // light #ffffff). Rebuilt at construction; a runtime theme switch takes effect on
+    // the next tooltip (the widget is re-shown per hover).
     textLabel->setStyleSheet(
-        "QLabel {"
-        "  background-color: #1e1f22;"
-        "  color: #e0e0e0;"
-        "  border: 1px solid #3a3b3c;"
-        "  border-radius: 4px;"
-        "  padding: 6px 10px;"
-        "  font-size: 13px;"
-        "}"
+        QStringLiteral("QLabel { background-color: %1; color: %2; border: 1px solid %3;"
+                         " border-radius: 4px; padding: 6px 10px; font-size: 13px; }")
+            .arg(AppTheme::themed<QString>(QStringLiteral("#1e1f22"), QStringLiteral("#ffffff")))
+            .arg(AppTheme::themed<QString>(QStringLiteral("#e0e0e0"), QStringLiteral("#1a1b1c")))
+            .arg(AppTheme::themed<QString>(QStringLiteral("#3a3b3c"), QStringLiteral("#c4c7cb")))
     );
 
     layout->addWidget(textLabel);

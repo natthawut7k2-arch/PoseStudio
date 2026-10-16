@@ -1,11 +1,12 @@
 /**
  * @file helpmanual.cpp
- * @brief Implements HelpManual: the manifest, the embedded pages, and the dark-theme styling of a
+ * @brief Implements HelpManual: the manifest, the embedded pages, and the theme-aware styling of a
  *        rendered page (see helpmanual.h).
  */
 
 #include "helpmanual.h"
 
+#include "apptheme.h"
 #include "constants.h"
 
 #include <QColor>
@@ -26,15 +27,17 @@ namespace {
 const QString kManualRoot = QStringLiteral(":/manual/");
 
 /// The page palette. The body text and background come from the browser's QSS (_help.qss);
-/// these are the parts a QTextDocument carries in its own formats.
-const QColor kHeadingColour(QStringLiteral("#ffffff"));
-const QColor kLinkColour(Constants::COLOR_ACCENT);
-const QColor kCodeText(QStringLiteral("#e8e8e8"));
-const QColor kCodeBackground(QStringLiteral("#2a2d30"));
-const QColor kCodeBlockBackground(QStringLiteral("#141516"));
-const QColor kQuoteText(QStringLiteral("#a8a8a8"));
-const QColor kTableBorder(QStringLiteral("#3a3b3c"));
-const QColor kTableHeaderBackground(QStringLiteral("#2a2d30"));
+/// these are the parts a QTextDocument carries in its own formats. Functions, not constants:
+/// render() runs per page, so a runtime theme switch re-renders with the active palette.
+/// (Dark values first, light second — see AppTheme::themed.)
+QColor kHeadingColour() { return AppTheme::themed(QColor(QStringLiteral("#ffffff")), QColor(QStringLiteral("#1a1b1c"))); }
+QColor kLinkColour() { return QColor(QLatin1String(Constants::COLOR_ACCENT)); }
+QColor kCodeText() { return AppTheme::themed(QColor(QStringLiteral("#e8e8e8")), QColor(QStringLiteral("#33363b"))); }
+QColor kCodeBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#e8ebee"))); }
+QColor kCodeBlockBackground() { return AppTheme::themed(QColor(QStringLiteral("#141516")), QColor(QStringLiteral("#f2f3f5"))); }
+QColor kQuoteText() { return AppTheme::themed(QColor(QStringLiteral("#a8a8a8")), QColor(QStringLiteral("#6f747a"))); }
+QColor kTableBorder() { return AppTheme::themed(QColor(QStringLiteral("#3a3b3c")), QColor(QStringLiteral("#c4c7cb"))); }
+QColor kTableHeaderBackground() { return AppTheme::themed(QColor(QStringLiteral("#2a2d30")), QColor(QStringLiteral("#e3e6ea"))); }
 
 QString readResource(const QString& path) {
     QFile file(path);
@@ -235,7 +238,7 @@ void HelpManual::styleDocument(QTextDocument& document) const {
             QTextCharFormat heading;
             heading.setAnchor(true);
             heading.setAnchorNames({slug});
-            heading.setForeground(kHeadingColour);
+            heading.setForeground(kHeadingColour());
             heading.setFontWeight(QFont::Bold);
             cursor.mergeCharFormat(heading);
             blockFormat.setTopMargin(level == 1 ? 6.0 : 18.0);
@@ -244,14 +247,14 @@ void HelpManual::styleDocument(QTextDocument& document) const {
             continue;
         }
         if (codeBlock) {
-            blockFormat.setBackground(kCodeBlockBackground);
+            blockFormat.setBackground(kCodeBlockBackground());
             blockFormat.setLeftMargin(12.0);
             blockFormat.setRightMargin(12.0);
             blockFormat.setTopMargin(2.0);
             blockFormat.setBottomMargin(2.0);
             cursor.mergeBlockFormat(blockFormat);
             QTextCharFormat code;
-            code.setForeground(kCodeText);
+            code.setForeground(kCodeText());
             cursor.mergeCharFormat(code);
             continue;
         }
@@ -259,7 +262,7 @@ void HelpManual::styleDocument(QTextDocument& document) const {
             blockFormat.setLeftMargin(16.0);
             cursor.mergeBlockFormat(blockFormat);
             QTextCharFormat muted;
-            muted.setForeground(kQuoteText);
+            muted.setForeground(kQuoteText());
             muted.setFontItalic(true);
             cursor.mergeCharFormat(muted);
         }
@@ -273,12 +276,12 @@ void HelpManual::styleDocument(QTextDocument& document) const {
             QTextCharFormat replacement;
             bool change = false;
             if (format.isAnchor() && !format.anchorHref().isEmpty()) {
-                replacement.setForeground(kLinkColour);
+                replacement.setForeground(kLinkColour());
                 replacement.setFontUnderline(false);
                 change = true;
             } else if (format.fontFixedPitch()) {
-                replacement.setForeground(kCodeText);
-                replacement.setBackground(kCodeBackground);
+                replacement.setForeground(kCodeText());
+                replacement.setBackground(kCodeBackground());
                 change = true;
             }
             if (change) {
@@ -305,7 +308,7 @@ void HelpManual::styleDocument(QTextDocument& document) const {
         }
         QTextTableFormat format = table->format();
         format.setBorder(1.0);
-        format.setBorderBrush(kTableBorder);
+        format.setBorderBrush(kTableBorder());
         format.setBorderStyle(QTextFrameFormat::BorderStyle_Solid);
         format.setBorderCollapse(true);
         format.setCellPadding(6.0);
@@ -320,7 +323,7 @@ void HelpManual::styleDocument(QTextDocument& document) const {
                 QTextCharFormat cellFormat = cell.format();
                 cellFormat.setVerticalAlignment(QTextCharFormat::AlignTop);
                 if (row < headerRows) {
-                    cellFormat.setBackground(kTableHeaderBackground);
+                    cellFormat.setBackground(kTableHeaderBackground());
                     // (the text itself, not the cell: a cell's own format does not embolden it)
                     QTextCursor text = cell.firstCursorPosition();
                     text.setPosition(cell.lastCursorPosition().position(), QTextCursor::KeepAnchor);

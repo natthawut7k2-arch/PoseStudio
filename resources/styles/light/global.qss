@@ -1,0 +1,203 @@
+/**
+ * @file light/global.qss
+ * @brief Light theme: primary application stylesheet for PoseStudio.
+ *
+ * Mirrors the dark global.qss selector-for-selector — same widgets, same radii,
+ * same cascade position (loaded first). Only the palette changes: app surfaces
+ * are light (#eef0f2/#ffffff), text is dark, and the accent (#5b87cc) plus the
+ * selection fill (#314D7A) stay shared with the dark theme so highlights read
+ * identically. Checked checkboxes paint the accent BEHIND the white check glyph
+ * (the dark theme keeps the dark well) because check.png is a white glyph.
+ */
+
+/* ========================================================================= */
+/* [ APPLICATION ROOT ]                                                      */
+/* ========================================================================= */
+
+QMainWindow {
+    /* Base application background (Light Theme Foundation) */
+    background-color: #eef0f2;
+}
+
+QLabel {
+    color: #1a1b1c;
+    font-size: 18px;
+    padding: 4px;
+}
+
+/* ========================================================================= */
+/* [ SPLITTERS (RESIZABLE PANELS) ]                                          */
+/* ========================================================================= */
+
+QSplitter::handle {
+    /* Subtle separation between main UI panels */
+    background-color: #dfe2e6;
+}
+
+QSplitter::handle:horizontal {
+    width: 6px;
+}
+
+QSplitter::handle:vertical {
+    height: 4px;
+}
+
+/* --- Splitter Interactions --- */
+
+QSplitter::handle:hover {
+    /* Slightly darken the handle so the user knows it can be dragged */
+    background-color: #c9ced4;
+}
+
+QSplitter::handle:pressed {
+    /* PoseStudio primary highlight color when actively resizing */
+    background-color: #5b87cc;
+}
+
+/* ========================================================================= */
+/* [ SIDEBAR TABS (QTabWidget) ]                                             */
+/* ========================================================================= */
+
+QTabWidget::pane {
+    /* Remove native 3D borders from the Fusion style to keep it flat */
+    border: none;
+    background-color: #ffffff;
+}
+
+QTabBar::tab {
+    background-color: #e3e6ea;
+    color: #5a5e63;
+    padding: 12px 6px;
+
+    /* Establish the boundary between unselected tabs */
+    border: 1px solid #cfd4d9;
+    border-right: none;
+
+    /* Soften the outer edge (assumes West-aligned tabs) */
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    margin-bottom: 2px;
+}
+
+/* --- Tab Interactions --- */
+
+QTabBar::tab:selected {
+    /* Active tab blends seamlessly into the QTabWidget pane color */
+    background-color: #ffffff;
+    color: #1a1b1c;
+}
+
+QTabBar::tab:hover:!selected {
+    /* Subtle highlight for inactive tabs when moused over */
+    background-color: #eef0f2;
+}
+
+/* ========================================================================= */
+/* [ TOOLTIPS ]                                                              */
+/* ========================================================================= */
+QToolTip {
+    background-color: #ffffff; /* Matches the light panel surfaces */
+    color: #1a1b1c;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 13px;
+}
+
+/* ========================================================================= */
+/* [ CHECKBOXES ]                                                            */
+/* ========================================================================= */
+/* ONE indicator app-wide (the Environment tab's toggles, the General page's ping toggle, any
+   checkbox a dialog grows): a light well with the app's hover accent; checked = the white
+   check glyph on the accent fill (check.png is white, so the dark theme's dark well would
+   hide it here). Only the label colour/size differs per panel — see _environment.qss and
+   _preferences.qss. */
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #a8adb3;
+    border-radius: 3px;
+    background: #ffffff;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #5b87cc; /* the app accent (Constants::COLOR_ACCENT) — same as the DragNumberBox hover border */
+}
+
+QCheckBox::indicator:checked {
+    background: #5b87cc;
+    image: url(:/resources/icons/check.png);
+}
+
+/* ========================================================================= */
+/* [ DIALOGS (QMessageBox, etc.) ]                                          */
+/* ========================================================================= */
+
+QDialog {
+    background-color: #f2f3f5;
+}
+
+QMessageBox QLabel {
+    /* Overrides the global dark QLabel color above with a softer tone, */
+    /* and drops the 18px default size that's sized for the main window. */
+    color: #33363b;
+    font-size: 13px;
+}
+
+QDialog QPushButton {
+    background-color: #ffffff;
+    color: #1a1b1c;
+    border: 1px solid #c4c7cb;
+    border-radius: 4px;
+    padding: 6px 16px;
+    min-width: 70px;
+}
+
+QDialog QPushButton:hover {
+    background-color: #e8ebee;
+}
+
+QDialog QPushButton:pressed {
+    background-color: #5b87cc;
+    color: #ffffff;
+}
+
+QDialog QPushButton:default {
+    /* Highlights whichever button Enter/Return will trigger */
+    border: 1px solid #5b87cc;
+}
+
+/* ========================================================================= */
+/* [ SCROLLBARS ]                                                            */
+/* ========================================================================= */
+/* The app-wide vertical scrollbar theme. Unscoped on purpose: every scroll   */
+/* area gets it. It used to sit in _assetmanager.qss under a "grid scrollbar" */
+/* heading while in fact styling every vertical scrollbar in the app.         */
+
+QScrollBar:vertical {
+    width: 14px;
+    margin: 0px;
+    background-color: #e3e6ea;
+    border: none;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 20px;
+    margin: 2px;
+    background-color: #b9bec5;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #9aa1a9;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}

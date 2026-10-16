@@ -1,0 +1,165 @@
+/**
+ * @file light/_environment.qss
+ * @brief Light theme: the properties tabs — Environment (src/properties/environmentpanel.*
+ *        and hdriselector.*) and Transform (src/properties/transformpanel.*).
+ *
+ * Mirror of the dark _environment.qss. Everything is scoped under #EnvironmentPanel /
+ * #TransformPanel or the tabs' own object names so it can't leak into other widgets.
+ * Palette: pane #ffffff, inputs #ffffff, borders #c4c7cb, accent #5b87cc,
+ * hover #dbe6f5, text #33363b.
+ */
+
+#EnvironmentPanel,
+#EnvironmentContent,
+#TransformPanel,
+#TransformContent {
+    background-color: #ffffff; /* same as the QTabWidget::pane the tab sits in */
+}
+
+#EnvironmentPanel QScrollArea,
+#TransformPanel QScrollArea {
+    background: transparent;
+    border: none;
+}
+
+/* Row labels: the global QLabel rule is dark/18px — far too big here. Reset to the app's body size. */
+#EnvironmentPanel QLabel,
+#TransformPanel QLabel {
+    color: #4a4e54;
+    font-size: 12px;
+    padding: 0;
+}
+/* A row whose dial the selected joint does not have (or no joint selected): the label dims with it. */
+#TransformPanel QLabel:disabled { color: #9aa1a9; }
+
+/* The Transform tab's heading (the selected joint's name) and its hint line under the rows. */
+#TransformPanel #TransformJointName {
+    color: #1a1b1c;
+    font-size: 13px;
+    font-weight: bold;
+}
+#TransformPanel #TransformHint { color: #6f747a; }
+
+/* Section frames. */
+#PropertyGroup {
+    border: 1px solid #c4c7cb;
+    border-radius: 5px;
+    margin-top: 14px;       /* room for the title sitting on the top border */
+    padding: 12px 8px 8px 8px;
+    font-size: 12px;
+    color: #33363b;
+}
+#PropertyGroup::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 8px;
+    padding: 0 4px;
+    color: #6f747a;
+}
+
+/* HDRI selector (HdriSelector, hdriselector.cpp): a button showing the current environment's name;
+ * clicking drops a menu hosting a scrollable thumbnail list (#HdriList) + a footer link. The menu
+ * chrome inherits the app-wide QMenu look from _menumanager.qss, exactly like the viewport's
+ * shader-mode menu. The Backdrop tab's Mode picker deliberately shares this object name, so the
+ * two fields look identical. */
+#EnvironmentHdriButton {
+    background-color: #ffffff;
+    color: #1a1b1c;
+    border: 1px solid #a8adb3;
+    border-radius: 4px;
+    padding: 4px 24px 4px 18px; /* generous left inset for the name; right room for the indicator */
+    min-height: 20px;
+    text-align: left;
+}
+#EnvironmentHdriButton:hover { border-color: #5b87cc; }
+#EnvironmentHdriButton::menu-indicator {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    right: 6px;
+}
+
+/* The thumbnail list inside the HDRI menu: tight rows, menu-style hover/selection, light scroll bar.
+ * Category headings (one per hdri/ subfolder) are disabled QListWidgetItems painted by a delegate in
+ * code (hdriselector.cpp HdriHeadingDelegate: a top gap, bold text, and a rule under it in
+ * the app-wide separator grey — Constants::COLOR_SEPARATOR). QSS can't address individual
+ * items, so no rule here. */
+#HdriList {
+    background-color: #ffffff;
+    color: #33363b;
+    outline: none; /* no dotted focus ring */
+}
+#HdriList::item {
+    padding: 2px 6px;   /* tight vertical rhythm between rows */
+}
+#HdriList::item:hover    { background-color: #dbe6f5; color: #1a1b1c; }
+#HdriList::item:selected { background-color: #314D7A; color: #ffffff; }
+#HdriList QScrollBar:vertical {
+    background: #ffffff;
+    width: 10px;
+    margin: 0;
+}
+#HdriList QScrollBar::handle:vertical {
+    background: #b9bec5;
+    border-radius: 5px;
+    min-height: 24px;
+}
+#HdriList QScrollBar::handle:vertical:hover { background: #5b87cc; }
+#HdriList QScrollBar::add-line:vertical,
+#HdriList QScrollBar::sub-line:vertical { height: 0; }
+#HdriList QScrollBar::add-page:vertical,
+#HdriList QScrollBar::sub-page:vertical { background: transparent; }
+
+/* Footer link under the list: left-justified, quiet, menu-item hover. */
+#HdriFolderLink {
+    background: transparent;
+    color: #4a4e54;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    text-align: left;
+}
+#HdriFolderLink:hover {
+    background-color: #dbe6f5;
+    color: #1a1b1c;
+}
+#HdriEmptyLabel { color: #6f747a; }
+
+/* Numeric rows are DragNumberBoxes (src/widgets/dragnumberbox.*) — the app-standard scrub field.
+ * It paints itself in C++ with the palette above as defaults; re-theme via its color Q_PROPERTYs
+ * (qproperty-fillColor etc.) if a container ever needs a different look. No rules needed here. */
+
+/* Per-row restore-default button (the small icon right of each DragNumberBox): quiet until
+ * hovered, then the light selection wash. */
+#PropertyRowRestore {
+    border: none;
+    background: transparent;
+    padding: 2px;
+    border-radius: 3px;
+}
+#PropertyRowRestore:hover   { background-color: #dbe6f5; }
+#PropertyRowRestore:pressed { background-color: #314D7A; }
+
+/* The toggles (tonemap, shadows): the label matches the row labels; the indicator itself is the
+ * app-wide QCheckBox::indicator rule in global.qss. */
+#EnvironmentPanel QCheckBox {
+    color: #4a4e54;
+    font-size: 12px;
+    spacing: 6px;
+}
+
+/* Reset button: quiet, secondary. */
+#PropertyResetButton {
+    background-color: #ffffff;
+    color: #33363b;
+    border: 1px solid #a8adb3;
+    border-radius: 4px;
+    padding: 5px 12px;
+}
+#PropertyResetButton:hover {
+    background-color: #314D7A;
+    color: #ffffff;
+}
+#PropertyResetButton:disabled {
+    color: #9aa1a9;
+    border-color: #d5d9de;
+}

@@ -6,6 +6,7 @@
 #include "preferencesdialog.h"
 #include "preferencespanel.h"
 #include "generalpreferencespanel.h"
+#include "interfacepreferencespanel.h"
 #include "assetspreferencespanel.h"
 #include "placeholderpreferencespanel.h"
 #include "factoryresetpreferencespanel.h"
@@ -70,10 +71,7 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
     });
 
     addPanel(tr("General"),       new GeneralPreferencesPanel(this));
-    addPanel(tr("Interface"),
-             new PlaceholderPreferencesPanel(
-                 tr("Interface"),
-                 tr("Interface and appearance settings will appear here."), this));
+    addPanel(tr("Interface"),      new InterfacePreferencesPanel(this));
     addPanel(tr("Assets"),        assetsPanel);
     addPanel(tr("Input"),
              new PlaceholderPreferencesPanel(

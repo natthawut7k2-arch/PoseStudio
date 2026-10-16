@@ -62,6 +62,14 @@ namespace Constants {
     // changes for the close/New prompt. Absent = off: the framing is still saved into the .pss
     // document, but fiddling with the view alone must not trip the prompt.
     inline constexpr const char* PREF_CAMERA_CHANGES_MARK_DIRTY = "CameraChangesMarkDirty";
+
+    // --- Appearance theme (src/shell/apptheme.h) ---
+    // "dark"/"light" — which QSS set AppTheme loads. Absent or unrecognised = dark, so
+    // installs from before the light theme existed keep their look. Validated on read:
+    // AppTheme::themeFromName() maps anything else back to dark rather than trusting disk.
+    inline constexpr const char* PREF_APPEARANCE_THEME = "AppearanceTheme";
+    inline constexpr const char* THEME_DARK = "dark";
+    inline constexpr const char* THEME_LIGHT = "light";
     // --- Anonymous install ping (src/core/installping.h) ---
     // Random per-installation UUID the ping carries; created on first use. A Factory Reset wipes
     // the Preferences table, so a reset install counts as a new one — acceptable.

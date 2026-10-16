@@ -12,6 +12,7 @@
 
 #include "viewportstrip.h"
 
+#include "apptheme.h"
 #include "jointmodebadge.h"
 #include "menupickerbutton.h"
 #include "scene/shademode.h"
@@ -35,20 +36,26 @@ namespace {
 // combo field. No cursor override on the strip's controls: Windows apps keep the standard arrow
 // over buttons (the hand cursor reads as a hyperlink there).
 QString pickerStyle(const QString& objectName, int minWidthPx) {
+    // Strip fields follow the active theme (dark #252627 / light #ffffff); hover keeps
+    // the shared selection fill in both. Rebuilt per strip, so a runtime theme switch
+    // applies to strips created afterwards — existing strips repolish via AppTheme.
+    const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
+    const QString text = AppTheme::themed<QString>(QStringLiteral("#e8e8ea"), QStringLiteral("#1a1b1c"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a8adb3"));
     return QStringLiteral("#%1 {"
-                          "  background-color: #252627;"
-                          "  color: #e8e8ea;"
-                          "  border: 1px solid #555555;"
+                          "  background-color: %2;"
+                          "  color: %3;"
+                          "  border: 1px solid %4;"
                           "  border-radius: 4px;"
                           "  padding: 5px 10px;"
-                          "  min-width: %2px;"
+                          "  min-width: %5px;"
                           "  font-size: 12px;"
                           "  text-align: left;"
                           "}"
                           "#%1:hover { background-color: #314D7A; color: #ffffff; }"
                           "#%1::menu-indicator { subcontrol-position: right center;"
                           "  subcontrol-origin: padding; right: 8px; }")
-        .arg(objectName)
+        .arg(objectName, surface, text, border)
         .arg(minWidthPx);
 }
 
@@ -56,12 +63,14 @@ QString pickerStyle(const QString& objectName, int minWidthPx) {
 // one control. A checkable button (Skeleton) shows its state in the accent and takes a quieter
 // hover so the two states stay distinguishable.
 QString iconButtonStyle(const QString& objectName, bool checkable) {
+    const QString surface = AppTheme::themed<QString>(QStringLiteral("#252627"), QStringLiteral("#ffffff"));
+    const QString border = AppTheme::themed<QString>(QStringLiteral("#555555"), QStringLiteral("#a8adb3"));
     QString style = QStringLiteral("#%1 {"
-                                   "  background-color: #252627;"
-                                   "  border: 1px solid #555555;"
+                                   "  background-color: %2;"
+                                   "  border: 1px solid %3;"
                                    "  border-radius: 4px;"
                                    "}")
-                        .arg(objectName);
+                        .arg(objectName, surface, border);
     if (checkable) {
         style += QStringLiteral("#%1:hover { background-color: #3a3d40; }"
                                 "#%1:checked { background-color: #314D7A; }")
