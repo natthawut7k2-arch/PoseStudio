@@ -111,6 +111,7 @@ void MenuManager::setupMenus() {
         {".DUF (DUF File)",                   &MenuManager::importFigureFile},
         {".FBX (FBX File)",                   nullptr},
         {".GLB (GL Transmission Format .glTF)", &MenuManager::importGlbFile},
+        {".JSON (Motion Script)",               &MenuManager::importMotionScriptFile},
         {".OBJ (Wavefront)",                  &MenuManager::importObjFile},
         {".PLY (Polygon File Format)",        nullptr},
         {".STL (Stereolithography)",          nullptr},
@@ -458,6 +459,22 @@ void MenuManager::importGlbFile() {
     PreferencesManager::instance().setValue(Constants::PREF_LAST_IMPORT_DIR,
                                             QFileInfo(path).absolutePath());
     viewportWidget->importGlb(path);
+}
+
+void MenuManager::importMotionScriptFile() {
+    if (!viewportWidget) return;
+
+    const QString path = QFileDialog::getOpenFileName(
+        mainWindow, tr("Import Motion Script"), rememberedStartDir(Constants::PREF_LAST_IMPORT_DIR),
+        tr("Motion Script JSON (*.json)"));
+    if (path.isEmpty()) return; // user cancelled
+
+    PreferencesManager::instance().setValue(Constants::PREF_LAST_IMPORT_DIR,
+                                            QFileInfo(path).absolutePath());
+    if (!viewportWidget->loadMotionScript(path)) {
+        QMessageBox::warning(mainWindow, tr("Import Motion Script"),
+                             tr("Could not load motion script file. Check that it contains a valid JSON motion sequence."));
+    }
 }
 
 void MenuManager::savePoseFile() {

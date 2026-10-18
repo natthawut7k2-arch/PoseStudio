@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "name": "Circular Walk 5s then Run 5s Loop",
+  "camera_follow": true,
+  "path": {
+    "type": "circle",
+    "radius": 3.0,
+    "center": [0.0, 0.0, 0.0],
+    "loop": true
+  },
+  "motion_sequence": [
+    {
+      "motion": "walk",
+      "duration": 5.0,
+      "speed": 1.2,
+      "frequency": 1.8
+    },
+    {
+      "motion": "run",
+      "duration": 5.0,
+      "speed": 2.5,
+      "frequency": 3.0
+    }
+  ]
+}
