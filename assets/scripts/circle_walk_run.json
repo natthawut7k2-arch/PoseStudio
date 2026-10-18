@@ -13,13 +13,25 @@
       "motion": "walk",
       "duration": 5.0,
       "speed": 1.2,
-      "frequency": 1.8
+      "frequency": 1.8,
+      "forward_lean": 3.0,
+      "arm_swing": 22.0,
+      "elbow_bend": 18.0,
+      "knee_bend": 46.0,
+      "knee_stance": 8.0,
+      "torso_twist": 4.0
     },
     {
       "motion": "run",
       "duration": 5.0,
       "speed": 2.5,
-      "frequency": 3.0
+      "frequency": 3.0,
+      "forward_lean": 15.0,
+      "arm_swing": 40.0,
+      "elbow_bend": 70.0,
+      "knee_bend": 72.0,
+      "knee_stance": 18.0,
+      "torso_twist": 7.0
     }
   ]
 }

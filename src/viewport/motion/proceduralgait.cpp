@@ -38,7 +38,7 @@ float ProceduralGait::defaultSpeed(GaitType type) {
     return 0.0f;
 }
 
-GaitFrame ProceduralGait::evaluateIdle(float phase) {
+GaitFrame ProceduralGait::evaluateIdle(float phase, const GaitParams& /*params*/) {
     GaitFrame frame;
     // Gentle breathing and subtle weight shift
     float breath = std::sin(phase) * 2.0f;
@@ -62,29 +62,50 @@ GaitFrame ProceduralGait::evaluateIdle(float phase) {
     return frame;
 }
 
-GaitFrame ProceduralGait::evaluateWalk(float phase) {
+GaitFrame ProceduralGait::evaluateWalk(float phase, const GaitParams& params) {
     GaitFrame frame;
-    // Leg pitch
+
+    const float forwardLean = (params.forwardLean >= 0.0f) ? params.forwardLean : 3.0f;
+    const float armSwing    = (params.armSwing >= 0.0f)    ? params.armSwing    : 22.0f;
+    const float elbowBend   = (params.elbowBend >= 0.0f)   ? params.elbowBend   : 18.0f;
+    const float kneeBend    = (params.kneeBend >= 0.0f)    ? params.kneeBend    : 46.0f;
+    const float kneeStance  = (params.kneeStance >= 0.0f)  ? params.kneeStance  : 8.0f;
+    const float torsoTwist  = (params.torsoTwist >= 0.0f)  ? params.torsoTwist  : 4.0f;
+
+    // 1. Leg pitch (alternating sinusoidal swing)
     float lThighPitch = 25.0f * std::sin(phase);
     float rThighPitch = -lThighPitch;
 
-    // Knee flexion (bends backwards when leg swings through)
-    float lKnee = 35.0f * std::max(0.0f, std::cos(phase));
-    float rKnee = 35.0f * std::max(0.0f, -std::cos(phase));
+    // 2. Realistic knee flexion: base slight bend + swing lift + stance shock absorption
+    float lCos = std::cos(phase);
+    float rCos = -lCos;
+    float lSwingKnee = kneeBend * std::pow(std::max(0.0f, lCos), 1.3f);
+    float rSwingKnee = kneeBend * std::pow(std::max(0.0f, rCos), 1.3f);
+    float lStanceKnee = kneeStance * std::pow(std::max(0.0f, -lCos), 1.5f);
+    float rStanceKnee = kneeStance * std::pow(std::max(0.0f, -rCos), 1.5f);
+    float lKnee = 4.0f + lSwingKnee + lStanceKnee;
+    float rKnee = 4.0f + rSwingKnee + rStanceKnee;
 
-    // Ankle compensation
+    // 3. Ankle compensation (dorsiflexion at heel strike, plantarflexion at push-off)
     float lFoot = -10.0f * std::sin(phase);
     float rFoot = -lFoot;
 
-    // Arm counterswing (opposite to legs)
-    float lArmPitch = -20.0f * std::sin(phase);
+    // 4. Natural arm swing:
+    // Shoulder pitch counter-swings opposite to legs
+    float lArmPitch = -armSwing * std::sin(phase);
     float rArmPitch = -lArmPitch;
-    float lForearm = 15.0f * (1.0f - std::cos(phase));
-    float rForearm = 15.0f * (1.0f + std::cos(phase));
+    // Slight inward yaw rotation of arm as it swings forward
+    float lArmYaw = -torsoTwist * 0.8f * std::sin(phase);
+    float rArmYaw = -lArmYaw;
+    // Forearm flexion: naturally flexes more on forward swing
+    float lForearm = elbowBend + 10.0f * (1.0f - lCos);
+    float rForearm = elbowBend + 10.0f * (1.0f - rCos);
 
-    // Pelvis tilt and torso sway
+    // 5. Torso and Pelvis:
     float pelvisRoll = 2.5f * std::sin(phase);
-    float chestTwist = -3.0f * std::sin(phase);
+    float chestTwist = -torsoTwist * std::sin(phase);
+    float hipPitch   = forwardLean * 0.4f;
+    float chestPitch = forwardLean * 0.6f;
 
     frame.boneRotations = {
         {"lThigh",   glm::vec3(lThighPitch, 0.0f, 0.0f)},
@@ -93,12 +114,12 @@ GaitFrame ProceduralGait::evaluateWalk(float phase) {
         {"rShin",    glm::vec3(rKnee, 0.0f, 0.0f)},
         {"lFoot",    glm::vec3(lFoot, 0.0f, 0.0f)},
         {"rFoot",    glm::vec3(rFoot, 0.0f, 0.0f)},
-        {"lShldr",   glm::vec3(lArmPitch, 0.0f, -5.0f)},
-        {"rShldr",   glm::vec3(rArmPitch, 0.0f, 5.0f)},
+        {"lShldr",   glm::vec3(lArmPitch, lArmYaw, -5.0f)},
+        {"rShldr",   glm::vec3(rArmPitch, rArmYaw, 5.0f)},
         {"lForeArm", glm::vec3(lForearm, 0.0f, 0.0f)},
         {"rForeArm", glm::vec3(rForearm, 0.0f, 0.0f)},
-        {"hip",      glm::vec3(0.0f, 0.0f, pelvisRoll)},
-        {"chest",    glm::vec3(2.0f, chestTwist, 0.0f)}
+        {"hip",      glm::vec3(hipPitch, 0.0f, pelvisRoll)},
+        {"chest",    glm::vec3(chestPitch, chestTwist, 0.0f)}
     };
 
     // Double bounce per walk cycle
@@ -106,29 +127,48 @@ GaitFrame ProceduralGait::evaluateWalk(float phase) {
     return frame;
 }
 
-GaitFrame ProceduralGait::evaluateRun(float phase) {
+GaitFrame ProceduralGait::evaluateRun(float phase, const GaitParams& params) {
     GaitFrame frame;
-    // Larger leg swing
+
+    const float forwardLean = (params.forwardLean >= 0.0f) ? params.forwardLean : 15.0f;
+    const float armSwing    = (params.armSwing >= 0.0f)    ? params.armSwing    : 40.0f;
+    const float elbowBend   = (params.elbowBend >= 0.0f)   ? params.elbowBend   : 70.0f;
+    const float kneeBend    = (params.kneeBend >= 0.0f)    ? params.kneeBend    : 72.0f;
+    const float kneeStance  = (params.kneeStance >= 0.0f)  ? params.kneeStance  : 18.0f;
+    const float torsoTwist  = (params.torsoTwist >= 0.0f)  ? params.torsoTwist  : 7.0f;
+
+    // 1. Larger leg swing
     float lThighPitch = 40.0f * std::sin(phase);
     float rThighPitch = -lThighPitch;
 
-    // Deep knee flexion
-    float lKnee = 65.0f * std::max(0.0f, std::cos(phase));
-    float rKnee = 65.0f * std::max(0.0f, -std::cos(phase));
+    // 2. Deep athletic knee flexion: base 8 deg + swing heel-kick + stance cushioning
+    float lCos = std::cos(phase);
+    float rCos = -lCos;
+    float lSwingKnee = kneeBend * std::pow(std::max(0.0f, lCos), 1.2f);
+    float rSwingKnee = kneeBend * std::pow(std::max(0.0f, rCos), 1.2f);
+    float lStanceKnee = kneeStance * std::pow(std::max(0.0f, -lCos), 1.5f);
+    float rStanceKnee = kneeStance * std::pow(std::max(0.0f, -rCos), 1.5f);
+    float lKnee = 8.0f + lSwingKnee + lStanceKnee;
+    float rKnee = 8.0f + rSwingKnee + rStanceKnee;
 
-    // Ankle extension
+    // 3. Ankle extension & push-off
     float lFoot = -15.0f * std::sin(phase);
     float rFoot = -lFoot;
 
-    // Vigorous arm pump
-    float lArmPitch = -35.0f * std::sin(phase);
+    // 4. Vigorous, bent-arm athletic pump
+    float lArmPitch = -armSwing * std::sin(phase);
     float rArmPitch = -lArmPitch;
-    float lForearm = 45.0f + 20.0f * (1.0f - std::cos(phase));
-    float rForearm = 45.0f + 20.0f * (1.0f + std::cos(phase));
+    float lArmYaw = -torsoTwist * 1.0f * std::sin(phase);
+    float rArmYaw = -lArmYaw;
+    // Forearms stay bent at acute athletic angle (~70°-95°), flexing as they drive forward
+    float lForearm = elbowBend + 15.0f * (1.0f - lCos);
+    float rForearm = elbowBend + 15.0f * (1.0f - rCos);
 
-    // Torso forward lean and dynamic sway
+    // 5. Torso forward lean and dynamic rotation:
+    float hipPitch   = forwardLean * 0.4f;
+    float chestPitch = forwardLean * 0.6f;
     float pelvisRoll = 4.0f * std::sin(phase);
-    float chestTwist = -6.0f * std::sin(phase);
+    float chestTwist = -torsoTwist * std::sin(phase);
 
     frame.boneRotations = {
         {"lThigh",   glm::vec3(lThighPitch, 0.0f, 0.0f)},
@@ -137,12 +177,12 @@ GaitFrame ProceduralGait::evaluateRun(float phase) {
         {"rShin",    glm::vec3(rKnee, 0.0f, 0.0f)},
         {"lFoot",    glm::vec3(lFoot, 0.0f, 0.0f)},
         {"rFoot",    glm::vec3(rFoot, 0.0f, 0.0f)},
-        {"lShldr",   glm::vec3(lArmPitch, 0.0f, -8.0f)},
-        {"rShldr",   glm::vec3(rArmPitch, 0.0f, 8.0f)},
+        {"lShldr",   glm::vec3(lArmPitch, lArmYaw, -8.0f)},
+        {"rShldr",   glm::vec3(rArmPitch, rArmYaw, 8.0f)},
         {"lForeArm", glm::vec3(lForearm, 0.0f, 0.0f)},
         {"rForeArm", glm::vec3(rForearm, 0.0f, 0.0f)},
-        {"hip",      glm::vec3(5.0f, 0.0f, pelvisRoll)},
-        {"chest",    glm::vec3(8.0f, chestTwist, 0.0f)}
+        {"hip",      glm::vec3(hipPitch, 0.0f, pelvisRoll)},
+        {"chest",    glm::vec3(chestPitch, chestTwist, 0.0f)}
     };
 
     // Flight phase vertical bounce
@@ -150,23 +190,25 @@ GaitFrame ProceduralGait::evaluateRun(float phase) {
     return frame;
 }
 
-GaitFrame ProceduralGait::evaluate(GaitType type, float phase) {
+GaitFrame ProceduralGait::evaluate(GaitType type, float phase, const GaitParams& params) {
     switch (type) {
-        case GaitType::Run:  return evaluateRun(phase);
-        case GaitType::Walk: return evaluateWalk(phase);
-        case GaitType::Idle: return evaluateIdle(phase);
+        case GaitType::Run:  return evaluateRun(phase, params);
+        case GaitType::Walk: return evaluateWalk(phase, params);
+        case GaitType::Idle: return evaluateIdle(phase, params);
     }
-    return evaluateIdle(phase);
+    return evaluateIdle(phase, params);
 }
 
 GaitFrame ProceduralGait::evaluateBlend(GaitType typeA, GaitType typeB,
-                                       float phaseA, float phaseB, float weight) {
+                                       float phaseA, float phaseB, float weight,
+                                       const GaitParams& paramsA,
+                                       const GaitParams& paramsB) {
     float w = std::clamp(weight, 0.0f, 1.0f);
-    if (w <= 0.0f) return evaluate(typeA, phaseA);
-    if (w >= 1.0f) return evaluate(typeB, phaseB);
+    if (w <= 0.0f) return evaluate(typeA, phaseA, paramsA);
+    if (w >= 1.0f) return evaluate(typeB, phaseB, paramsB);
 
-    GaitFrame frameA = evaluate(typeA, phaseA);
-    GaitFrame frameB = evaluate(typeB, phaseB);
+    GaitFrame frameA = evaluate(typeA, phaseA, paramsA);
+    GaitFrame frameB = evaluate(typeB, phaseB, paramsB);
 
     GaitFrame blended;
     blended.verticalBounce = (1.0f - w) * frameA.verticalBounce + w * frameB.verticalBounce;

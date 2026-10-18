@@ -49,12 +49,16 @@ def test_circular_trajectory():
 def test_procedural_gait():
     print("Testing Procedural Gait Waveforms...")
     
-    def evaluate_walk(phase):
-        # phi in [0, 2pi)
+    def evaluate_walk(phase, params=None):
+        if params is None:
+            params = {"arm_swing": 22.0, "knee_bend": 46.0, "knee_stance": 8.0, "forward_lean": 3.0}
         thigh_pitch = 25.0 * math.sin(phase)
-        knee_flex = 35.0 * max(0.0, math.cos(phase))
-        arm_pitch = -20.0 * math.sin(phase)
-        pelvis_bounce = -0.03 * abs(math.cos(phase))
+        cos_p = math.cos(phase)
+        sw = params["knee_bend"] * (max(0.0, cos_p) ** 1.3)
+        st = params["knee_stance"] * (max(0.0, -cos_p) ** 1.5)
+        knee_flex = 4.0 + sw + st
+        arm_pitch = -params["arm_swing"] * math.sin(phase)
+        pelvis_bounce = -0.03 * abs(cos_p)
         return {
             "lThigh": thigh_pitch,
             "rThigh": -thigh_pitch,
@@ -64,10 +68,15 @@ def test_procedural_gait():
             "bounce": pelvis_bounce
         }
         
-    def evaluate_run(phase):
+    def evaluate_run(phase, params=None):
+        if params is None:
+            params = {"arm_swing": 40.0, "knee_bend": 72.0, "knee_stance": 18.0, "forward_lean": 15.0}
         thigh_pitch = 40.0 * math.sin(phase)
-        knee_flex = 65.0 * max(0.0, math.cos(phase))
-        arm_pitch = -35.0 * math.sin(phase)
+        cos_p = math.cos(phase)
+        sw = params["knee_bend"] * (max(0.0, cos_p) ** 1.2)
+        st = params["knee_stance"] * (max(0.0, -cos_p) ** 1.5)
+        knee_flex = 8.0 + sw + st
+        arm_pitch = -params["arm_swing"] * math.sin(phase)
         pelvis_bounce = 0.06 * math.sin(2.0 * phase)
         return {
             "lThigh": thigh_pitch,
@@ -81,15 +90,15 @@ def test_procedural_gait():
     # Check walk characteristics
     walk_mid = evaluate_walk(math.pi / 2.0)
     assert abs(walk_mid["lThigh"] - 25.0) < 1e-4, f"Walk max thigh pitch expected 25.0, got {walk_mid['lThigh']}"
-    assert abs(walk_mid["lShldr"] - (-20.0)) < 1e-4, f"Walk arm counterswing mismatch: {walk_mid['lShldr']}"
+    assert abs(walk_mid["lShldr"] - (-22.0)) < 1e-4, f"Walk arm counterswing mismatch: {walk_mid['lShldr']}"
     
     # Check run characteristics
     run_mid = evaluate_run(math.pi / 2.0)
     assert abs(run_mid["lThigh"] - 40.0) < 1e-4, f"Run max thigh pitch expected 40.0, got {run_mid['lThigh']}"
-    assert abs(run_mid["lShin"] - 0.0) < 1e-4, f"Run knee at pi/2 expected 0, got {run_mid['lShin']}"
+    assert abs(run_mid["lShin"] - 8.0) < 1e-4, f"Run knee at pi/2 expected 8.0 (baseline), got {run_mid['lShin']}"
     
     run_knee_max = evaluate_run(0.0)
-    assert abs(run_knee_max["lShin"] - 65.0) < 1e-4, f"Run max knee flexion expected 65.0, got {run_knee_max['lShin']}"
+    assert abs(run_knee_max["lShin"] - 80.0) < 1e-4, f"Run max knee flexion expected 80.0, got {run_knee_max['lShin']}"
     
     # Verify transition smoothness
     # At t=5.0s, transition window tau = 0.5s: from 4.75s to 5.25s

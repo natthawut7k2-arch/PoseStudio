@@ -22,10 +22,25 @@ float smoothstep(float edge0, float edge1, float x) {
 } // namespace
 
 MotionEngine::MotionEngine() {
-    // Default setup: a 5s walk followed by 5s run on a 3m circle loop
+    GaitParams walkParams;
+    walkParams.forwardLean = 3.0f;
+    walkParams.armSwing = 22.0f;
+    walkParams.elbowBend = 18.0f;
+    walkParams.kneeBend = 46.0f;
+    walkParams.kneeStance = 8.0f;
+    walkParams.torsoTwist = 4.0f;
+
+    GaitParams runParams;
+    runParams.forwardLean = 15.0f;
+    runParams.armSwing = 40.0f;
+    runParams.elbowBend = 70.0f;
+    runParams.kneeBend = 72.0f;
+    runParams.kneeStance = 18.0f;
+    runParams.torsoTwist = 7.0f;
+
     m_clips = {
-        {GaitType::Walk, "walk", 5.0f, 1.2f, 1.8f},
-        {GaitType::Run,  "run",  5.0f, 2.5f, 3.0f}
+        {GaitType::Walk, "walk", 5.0f, 1.2f, 1.8f, walkParams},
+        {GaitType::Run,  "run",  5.0f, 2.5f, 3.0f, runParams}
     };
     m_pathConfig.type = PathType::Circle;
     m_pathConfig.radius = 3.0f;
@@ -84,7 +99,27 @@ bool MotionEngine::loadScriptFromJson(const std::string& jsonContent) {
         float speed = static_cast<float>(obj.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
         float freq = static_cast<float>(obj.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
 
-        parsedClips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq});
+        GaitParams params;
+        if (obj.contains(QStringLiteral("forward_lean"))) {
+            params.forwardLean = static_cast<float>(obj.value(QStringLiteral("forward_lean")).toDouble(-1.0));
+        }
+        if (obj.contains(QStringLiteral("arm_swing"))) {
+            params.armSwing = static_cast<float>(obj.value(QStringLiteral("arm_swing")).toDouble(-1.0));
+        }
+        if (obj.contains(QStringLiteral("elbow_bend"))) {
+            params.elbowBend = static_cast<float>(obj.value(QStringLiteral("elbow_bend")).toDouble(-1.0));
+        }
+        if (obj.contains(QStringLiteral("knee_bend"))) {
+            params.kneeBend = static_cast<float>(obj.value(QStringLiteral("knee_bend")).toDouble(-1.0));
+        }
+        if (obj.contains(QStringLiteral("knee_stance"))) {
+            params.kneeStance = static_cast<float>(obj.value(QStringLiteral("knee_stance")).toDouble(-1.0));
+        }
+        if (obj.contains(QStringLiteral("torso_twist"))) {
+            params.torsoTwist = static_cast<float>(obj.value(QStringLiteral("torso_twist")).toDouble(-1.0));
+        }
+
+        parsedClips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq, params});
     }
 
     if (parsedClips.empty()) {
@@ -245,9 +280,10 @@ MotionFrame MotionEngine::evaluateFrame(float time, float distance) {
         float blendWeight = smoothstep(currentClip.duration - kTransitionDuration,
                                        currentClip.duration, localT);
         gaitFrame = ProceduralGait::evaluateBlend(currentClip.gait, nextClip.gait,
-                                                 phase, nextPhase, blendWeight);
+                                                 phase, nextPhase, blendWeight,
+                                                 currentClip.params, nextClip.params);
     } else {
-        gaitFrame = ProceduralGait::evaluate(currentClip.gait, phase);
+        gaitFrame = ProceduralGait::evaluate(currentClip.gait, phase, currentClip.params);
     }
 
     // Solve spatial position & tangent yaw

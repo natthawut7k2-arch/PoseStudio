@@ -16,6 +16,7 @@ struct MotionClip {
     float       duration = 5.0f;
     float       speed = 1.2f;
     float       frequency = 1.8f;
+    GaitParams  params;
 };
 
 struct MotionFrame {

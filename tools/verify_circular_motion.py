@@ -15,17 +15,31 @@ def smoothstep(edge0, edge1, x):
     t = max(0.0, min(1.0, (x - edge0) / (edge1 - edge0)))
     return t * t * (3.0 - 2.0 * t)
 
-def evaluate_gait(gait_type, phase):
+def evaluate_gait(gait_type, phase, clip=None):
+    if clip is None:
+        clip = {}
+    forward_lean = clip.get("forward_lean", 15.0 if gait_type == "run" else 3.0)
+    arm_swing = clip.get("arm_swing", 40.0 if gait_type == "run" else 22.0)
+    knee_bend = clip.get("knee_bend", 72.0 if gait_type == "run" else 46.0)
+    knee_stance = clip.get("knee_stance", 18.0 if gait_type == "run" else 8.0)
+
+    cos_p = math.cos(phase)
+    sin_p = math.sin(phase)
+
     if gait_type == "run":
-        thigh = 40.0 * math.sin(phase)
-        knee = 65.0 * max(0.0, math.cos(phase))
-        arm = -35.0 * math.sin(phase)
+        thigh = 40.0 * sin_p
+        sw = knee_bend * (max(0.0, cos_p) ** 1.2)
+        st = knee_stance * (max(0.0, -cos_p) ** 1.5)
+        knee = 8.0 + sw + st
+        arm = -arm_swing * sin_p
         bounce = 0.06 * math.sin(2.0 * phase)
     elif gait_type == "walk":
-        thigh = 25.0 * math.sin(phase)
-        knee = 35.0 * max(0.0, math.cos(phase))
-        arm = -20.0 * math.sin(phase)
-        bounce = -0.03 * abs(math.cos(phase))
+        thigh = 25.0 * sin_p
+        sw = knee_bend * (max(0.0, cos_p) ** 1.3)
+        st = knee_stance * (max(0.0, -cos_p) ** 1.5)
+        knee = 4.0 + sw + st
+        arm = -arm_swing * sin_p
+        bounce = -0.03 * abs(cos_p)
     else:
         thigh = 0.0
         knee = 0.0
@@ -70,14 +84,14 @@ def verify_simulation():
                 w = smoothstep(4.5, 5.0, clip_local_t)
                 p0 = 2.0 * math.pi * seq[0]["frequency"] * t
                 p1 = 2.0 * math.pi * seq[1]["frequency"] * t
-                g0 = evaluate_gait("walk", p0)
-                g1 = evaluate_gait("run", p1)
+                g0 = evaluate_gait("walk", p0, seq[0])
+                g1 = evaluate_gait("run", p1, seq[1])
                 thigh = (1.0 - w) * g0["lThigh"] + w * g1["lThigh"]
                 knee = (1.0 - w) * g0["lShin"] + w * g1["lShin"]
                 bounce = (1.0 - w) * g0["bounce"] + w * g1["bounce"]
             else:
                 p0 = 2.0 * math.pi * seq[0]["frequency"] * t
-                g = evaluate_gait("walk", p0)
+                g = evaluate_gait("walk", p0, seq[0])
                 thigh, knee, bounce = g["lThigh"], g["lShin"], g["bounce"]
                 max_walk_knee = max(max_walk_knee, knee)
         else:
@@ -86,7 +100,7 @@ def verify_simulation():
             speed = active_clip["speed"]
             distance += speed * dt
             p1 = 2.0 * math.pi * seq[1]["frequency"] * t
-            g = evaluate_gait("run", p1)
+            g = evaluate_gait("run", p1, seq[1])
             thigh, knee, bounce = g["lThigh"], g["lShin"], g["bounce"]
             max_run_knee = max(max_run_knee, knee)
 
@@ -112,8 +126,8 @@ def verify_simulation():
             assert delta < 15.0, f"Discontinuity at frame {i} (t={t:.3f}s): delta={delta:.2f}"
         prev_thigh = thigh
 
-    assert abs(max_walk_knee - 35.0) < 0.5, f"Expected walk knee peak ~35 deg, got {max_walk_knee}"
-    assert abs(max_run_knee - 65.0) < 0.5, f"Expected run knee peak ~65 deg, got {max_run_knee}"
+    assert abs(max_walk_knee - 50.0) < 0.5, f"Expected walk knee peak ~50 deg, got {max_walk_knee}"
+    assert abs(max_run_knee - 80.0) < 0.5, f"Expected run knee peak ~80 deg, got {max_run_knee}"
     print(f"  [PASS] 600 frames simulated: walk knee max={max_walk_knee:.1f}°, run knee max={max_run_knee:.1f}°")
     print(f"  [PASS] Circular trajectory exact (radius={radius}m), smooth cross-fade, continuous heading.")
 
