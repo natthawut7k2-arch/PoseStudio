@@ -292,6 +292,13 @@ add_executable(
     src/viewport/import/importerregistry.h
     src/viewport/import/obj/objimporter.cpp   # single TINYOBJLOADER_IMPLEMENTATION TU
     src/viewport/import/obj/objimporter.h
+    # GL Transmission Format (.glb/.gltf) importer + automatic humanoid rigging:
+    src/viewport/import/glb/cgltf.h
+    src/viewport/import/glb/cgltf_impl.cpp
+    src/viewport/import/glb/humanoidautorigger.cpp
+    src/viewport/import/glb/humanoidautorigger.h
+    src/viewport/import/glb/glbimporter.cpp
+    src/viewport/import/glb/glbimporter.h
     # Native figure importer (rigged/morphed characters; JSON scene format via nlohmann + miniz):
     src/viewport/import/figure/figuredocument.cpp
     src/viewport/import/figure/figuredocument.h
@@ -504,6 +511,7 @@ target_include_directories(PoseStudio PRIVATE
     src/viewport/import
     src/viewport/import/obj
     src/viewport/import/figure
+    src/viewport/import/glb
     ${glm_SOURCE_DIR}                        # so <glm/glm.hpp> resolves
     ${vma_SOURCE_DIR}/include                # so <vk_mem_alloc.h> resolves
     ${tinyobjloader_SOURCE_DIR}             # so <tiny_obj_loader.h> resolves

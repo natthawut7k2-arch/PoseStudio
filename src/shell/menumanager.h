@@ -71,6 +71,9 @@ private:
     /// Opens a file dialog and imports the chosen OBJ into the viewport.
     void importObjFile();
 
+    /// Opens a file dialog and imports the chosen GLB/glTF into the viewport.
+    void importGlbFile();
+
     /// Opens a file dialog and imports the chosen native figure (`.duf`/`.dsf`) into the viewport.
     void importFigureFile();
 

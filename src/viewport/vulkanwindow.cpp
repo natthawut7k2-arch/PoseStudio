@@ -227,6 +227,9 @@ bool VulkanWindow::runImport(const PendingImport& import, bool showProgress) {
     case PendingImport::Kind::Figure:
         ok = FigureImportService::importInto(*m_renderer, import.path, showProgress);
         break;
+    case PendingImport::Kind::Glb:
+        ok = ModelImportService::importInto(*m_renderer, import.path, showProgress);
+        break;
     }
     if (ok) {
         markProjectDirty(); // a new model is a document change
@@ -258,6 +261,10 @@ void VulkanWindow::importObj(const QString& path) {
 
 void VulkanWindow::importFigure(const QString& path) {
     importOrQueue({PendingImport::Kind::Figure, path});
+}
+
+void VulkanWindow::importGlb(const QString& path) {
+    importOrQueue({PendingImport::Kind::Glb, path});
 }
 
 bool VulkanWindow::hasPosableFigure() const {

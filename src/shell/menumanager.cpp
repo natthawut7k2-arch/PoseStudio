@@ -110,7 +110,7 @@ void MenuManager::setupMenus() {
         {".DAE (Collada)",                    nullptr},
         {".DUF (DUF File)",                   &MenuManager::importFigureFile},
         {".FBX (FBX File)",                   nullptr},
-        {".GLB (GL Transmission Format .glTF)", nullptr},
+        {".GLB (GL Transmission Format .glTF)", &MenuManager::importGlbFile},
         {".OBJ (Wavefront)",                  &MenuManager::importObjFile},
         {".PLY (Polygon File Format)",        nullptr},
         {".STL (Stereolithography)",          nullptr},
@@ -444,6 +444,20 @@ void MenuManager::importFigureFile() {
     PreferencesManager::instance().setValue(Constants::PREF_LAST_IMPORT_DIR,
                                             QFileInfo(path).absolutePath());
     viewportWidget->importFigure(path);
+}
+
+void MenuManager::importGlbFile() {
+    if (!viewportWidget) return;
+    // (No unsaved-changes prompt: an import ADDS to the scene, it replaces nothing.)
+
+    const QString path = QFileDialog::getOpenFileName(
+        mainWindow, tr("Import GLB"), rememberedStartDir(Constants::PREF_LAST_IMPORT_DIR),
+        tr("glTF Binary (*.glb *.gltf)"));
+    if (path.isEmpty()) return; // user cancelled
+
+    PreferencesManager::instance().setValue(Constants::PREF_LAST_IMPORT_DIR,
+                                            QFileInfo(path).absolutePath());
+    viewportWidget->importGlb(path);
 }
 
 void MenuManager::savePoseFile() {

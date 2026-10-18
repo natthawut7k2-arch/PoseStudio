@@ -104,6 +104,10 @@ public:
     /// importObj; routed to the FigureImportService.
     void importFigure(const QString& path);
 
+    /// Imports a GLB/glTF file into the scene. Same queue-until-ready behaviour as
+    /// importObj.
+    void importGlb(const QString& path);
+
     /// Whether the scene holds a posable figure (gates the pose save/load actions).
     bool hasPosableFigure() const;
     /// Saves / loads the posed figure's joint rotations to/from @p path. Returns false if there's
@@ -335,7 +339,7 @@ private:
     /// An import requested before the renderer existed, replayed in request order once it does
     /// (command-line "open with" hands several in a row — the order must survive).
     struct PendingImport {
-        enum class Kind { Obj, Figure };
+        enum class Kind { Obj, Figure, Glb };
         Kind    kind = Kind::Obj;
         QString path;
     };

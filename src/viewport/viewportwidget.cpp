@@ -155,6 +155,10 @@ void ViewportWidget::importFigure(const QString& path) {
     withWindow([&](VulkanWindow& w) { w.importFigure(path); });
 }
 
+void ViewportWidget::importGlb(const QString& path) {
+    withWindow([&](VulkanWindow& w) { w.importGlb(path); });
+}
+
 bool ViewportWidget::hasPosableFigure() const {
     return m_window && m_window->hasPosableFigure();
 }

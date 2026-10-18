@@ -62,6 +62,10 @@ public:
     /// degraded to the Vulkan-unavailable message.
     void importFigure(const QString& path);
 
+    /// Imports a GLB/glTF file into the 3D scene. No-op if the viewport degraded to the
+    /// Vulkan-unavailable message.
+    void importGlb(const QString& path);
+
     /// Whether the scene holds a posable figure (gates the pose save/load menu actions).
     bool hasPosableFigure() const;
     /// Saves / loads the posed figure's joint rotations to/from @p path. Returns false on failure
