@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.20] - 2026-10-18
+
+### Added
+* **Direct Google AI Studio Motion Schema Support:** Added native engine support for reading root-level `biomechanics` objects (`speed`, `frequency`, `forward_lean`, `arm_swing`, `elbow_bend`, `knee_bend`, `knee_stance`, `torso_twist`), allowing JSON motion scripts exported directly from Google AI Studio web apps to load and play seamlessly in PoseStudio without manual reformatting.
+* **Bundled Normal Walk Preset:** Added `assets/scripts/normal_walk.json` showcasing realistic walk dynamics.
+
 ## [0.3.19] - 2026-10-18
 
 ### Added
