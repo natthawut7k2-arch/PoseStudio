@@ -77,6 +77,9 @@ private:
     /// Opens a file dialog and imports the chosen native figure (`.duf`/`.dsf`) into the viewport.
     void importFigureFile();
 
+    /// Opens a file dialog and imports a JSON motion choreography script into the viewport.
+    void importMotionScriptFile();
+
     /// Saves / loads the current figure's pose to/from a `.pose` file via a file dialog.
     void savePoseFile();
     void loadPoseFile();

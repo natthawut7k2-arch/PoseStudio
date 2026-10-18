@@ -10,6 +10,7 @@
 #include "scene/shademode.h"
 #include "viewportstrip.h"
 #include "vulkanwindow.h"
+#include "widgets/motionplaybackbar.h"
 
 #include <QAction>
 #include <QCoreApplication>
@@ -142,7 +143,21 @@ ViewportWidget::ViewportWidget(QWidget* parent) : QWidget(parent) {
     connect(m_window, &VulkanWindow::environmentRestored, this, &ViewportWidget::environmentRestored);
     m_container = QWidget::createWindowContainer(m_window, this);
     m_container->setFocusPolicy(Qt::StrongFocus); // so the viewport can receive wheel/keys
-    layout->addWidget(m_container);
+    layout->addWidget(m_container, 1);
+
+    m_playbackBar = new MotionPlaybackBar(this);
+    layout->addWidget(m_playbackBar, 0);
+
+    connect(m_playbackBar, &MotionPlaybackBar::playRequested, m_window, &VulkanWindow::playMotion);
+    connect(m_playbackBar, &MotionPlaybackBar::pauseRequested, m_window, &VulkanWindow::pauseMotion);
+    connect(m_playbackBar, &MotionPlaybackBar::stopRequested, m_window, &VulkanWindow::stopMotion);
+    connect(m_playbackBar, &MotionPlaybackBar::seekRequested, m_window, &VulkanWindow::seekMotion);
+    connect(m_playbackBar, &MotionPlaybackBar::cameraFollowToggled, m_window, &VulkanWindow::setMotionCameraFollow);
+    connect(m_playbackBar, &MotionPlaybackBar::loopToggled, m_window, &VulkanWindow::setMotionLoop);
+
+    connect(m_window, &VulkanWindow::motionStateChanged, m_playbackBar, &MotionPlaybackBar::setPlaybackTime);
+    connect(m_window, &VulkanWindow::motionCameraFollowChanged, m_playbackBar, &MotionPlaybackBar::setCameraFollowState);
+    connect(m_window, &VulkanWindow::motionLoopChanged, m_playbackBar, &MotionPlaybackBar::setLoopState);
 
     createStrip(); // the floating control strip in the top-right corner
 }
@@ -157,6 +172,17 @@ void ViewportWidget::importFigure(const QString& path) {
 
 void ViewportWidget::importGlb(const QString& path) {
     withWindow([&](VulkanWindow& w) { w.importGlb(path); });
+}
+
+bool ViewportWidget::loadMotionScript(const QString& path) {
+    if (!m_window) return false;
+    bool ok = m_window->loadMotionScript(path);
+    if (ok && m_playbackBar) {
+        m_playbackBar->setPlaybackTime(0.0f, m_window->motionEngine().totalDuration(), false);
+        m_playbackBar->setCameraFollowState(m_window->motionEngine().isCameraFollow());
+        m_playbackBar->setLoopState(m_window->motionEngine().isLoop());
+    }
+    return ok;
 }
 
 bool ViewportWidget::hasPosableFigure() const {

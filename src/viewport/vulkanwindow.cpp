@@ -21,6 +21,10 @@
 #include "rendering/vulkancontext.h"
 #include "rendering/vulkanrenderer.h"
 #include "scene/scene.h"
+#include "scene/model.h"
+#include "scene/ik/bonealiases.h"
+#include "motion/motionserver.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <QDebug>
 #include <QFileInfo>
@@ -66,6 +70,25 @@ VulkanWindow::VulkanWindow(QVulkanInstance* instance, uint32_t apiVersion, QStri
     m_fall.timer = new QTimer(this);
     m_fall.timer->setInterval(16);
     connect(m_fall.timer, &QTimer::timeout, this, &VulkanWindow::onFallTick);
+
+    // Motion animation tick (60 FPS procedural animation driver)
+    m_motionTimer = new QTimer(this);
+    m_motionTimer->setInterval(16);
+    connect(m_motionTimer, &QTimer::timeout, this, &VulkanWindow::onMotionTick);
+
+    // Local TCP socket server for live JSON motion choreography control
+    m_motionServer = std::make_unique<MotionServer>(&m_motionEngine, this);
+    m_motionServer->start(9876);
+
+    connect(m_motionServer.get(), &MotionServer::playRequested, this, &VulkanWindow::playMotion);
+    connect(m_motionServer.get(), &MotionServer::pauseRequested, this, &VulkanWindow::pauseMotion);
+    connect(m_motionServer.get(), &MotionServer::stopRequested, this, &VulkanWindow::stopMotion);
+    connect(m_motionServer.get(), &MotionServer::seekRequested, this, &VulkanWindow::seekMotion);
+    connect(m_motionServer.get(), &MotionServer::cameraFollowRequested, this, &VulkanWindow::setMotionCameraFollow);
+    connect(m_motionServer.get(), &MotionServer::loopRequested, this, &VulkanWindow::setMotionLoop);
+    connect(m_motionServer.get(), &MotionServer::loadScriptRequested, this, [this](const QString&) {
+        stopMotion();
+    });
 
     m_diag = IkDiagnostics::fromEnvironment(); // null unless POSESTUDIO_IK_PERF / _BENCH is set
     m_script = IkScript::fromEnvironment();    // null unless POSESTUDIO_IK_SCRIPT is set
@@ -367,6 +390,104 @@ void VulkanWindow::renderFrame() {
         // Qt's event loop and abort the whole app.
         failDevice("Rendering", e);
     }
+}
+
+bool VulkanWindow::loadMotionScript(const QString& path) {
+    bool ok = m_motionEngine.loadScriptFromFile(path.toStdString());
+    if (ok) {
+        stopMotion();
+    }
+    return ok;
+}
+
+void VulkanWindow::playMotion() {
+    m_motionEngine.play();
+    if (m_motionTimer && !m_motionTimer->isActive()) {
+        m_motionTimer->start();
+    }
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::pauseMotion() {
+    m_motionEngine.pause();
+    if (m_motionTimer && m_motionTimer->isActive()) {
+        m_motionTimer->stop();
+    }
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::stopMotion() {
+    m_motionEngine.stop();
+    if (m_motionTimer && m_motionTimer->isActive()) {
+        m_motionTimer->stop();
+    }
+    applyMotionFrame(m_motionEngine.evaluateAt(0.0f));
+    emit motionStateChanged(0.0f, m_motionEngine.totalDuration(), false);
+}
+
+void VulkanWindow::seekMotion(float seconds) {
+    m_motionEngine.seek(seconds);
+    applyMotionFrame(m_motionEngine.evaluateAt(seconds));
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::setMotionLoop(bool loop) {
+    m_motionEngine.setLoop(loop);
+    emit motionLoopChanged(loop);
+}
+
+void VulkanWindow::setMotionCameraFollow(bool follow) {
+    m_motionEngine.setCameraFollow(follow);
+    emit motionCameraFollowChanged(follow);
+}
+
+void VulkanWindow::onMotionTick() {
+    if (!m_motionEngine.isPlaying()) {
+        return;
+    }
+    MotionFrame frame = m_motionEngine.evaluate(0.016667f);
+    applyMotionFrame(frame);
+}
+
+void VulkanWindow::applyMotionFrame(const MotionFrame& frame) {
+    if (!frame.valid) {
+        return;
+    }
+    withRenderer([&](VulkanRenderer& r) {
+        Scene& sc = r.scene();
+        Model* model = sc.figureModel();
+        if (model) {
+            // 1. Bone rotations mapped through canonical aliases
+            const Armature& arm = model->armature();
+            std::vector<std::pair<std::string, glm::vec3>> mappedRotations;
+            mappedRotations.reserve(frame.boneRotations.size());
+            for (const auto& [canonical, rot] : frame.boneRotations) {
+                std::string actual = aliasedBoneName(arm, canonical);
+                mappedRotations.emplace_back(actual, rot);
+            }
+            model->applyPose(mappedRotations);
+
+            // 2. Spatial placement preserving base scale: translate * rotateY * scale
+            const glm::mat4& currentT = model->transform();
+            glm::vec3 baseScale(
+                glm::length(glm::vec3(currentT[0])),
+                glm::length(glm::vec3(currentT[1])),
+                glm::length(glm::vec3(currentT[2]))
+            );
+            if (baseScale.x < 1e-4f) baseScale = glm::vec3(1.0f);
+
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), frame.worldPosition);
+            glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(frame.yawDegrees), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::mat4 S = glm::scale(glm::mat4(1.0f), baseScale);
+            model->setTransform(T * R * S);
+
+            // 3. Camera follow tracking
+            if (frame.cameraFollow) {
+                sc.camera().setTarget(frame.worldPosition + glm::vec3(0.0f, 0.9f, 0.0f));
+            }
+        }
+    });
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
 }
 
 } // namespace pose

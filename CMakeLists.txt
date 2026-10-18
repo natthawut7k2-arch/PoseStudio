@@ -194,6 +194,8 @@ add_executable(
     src/widgets/dragnumberbox.h
     src/widgets/menupickerbutton.cpp      # push button + exclusive QMenu (the app's "dropdown")
     src/widgets/menupickerbutton.h
+    src/widgets/motionplaybackbar.cpp     # docked viewport motion playback controls
+    src/widgets/motionplaybackbar.h
 
     # --- Properties panels (right-docker tabs) ---
     src/properties/environmentpanel.cpp
@@ -413,6 +415,16 @@ add_executable(
     src/viewport/scene/ik/ikeffector.h        # one pin of a drag
     src/viewport/scene/ik/bodymesh.h
     src/viewport/scene/ik/cursorfilter.h      # the drag's adaptive cursor low-pass (shared with the harness)
+
+    # Procedural Motion Control & Choreography
+    src/viewport/motion/proceduralgait.cpp
+    src/viewport/motion/proceduralgait.h
+    src/viewport/motion/trajectorysolver.cpp
+    src/viewport/motion/trajectorysolver.h
+    src/viewport/motion/motionengine.cpp
+    src/viewport/motion/motionengine.h
+    src/viewport/motion/motionserver.cpp
+    src/viewport/motion/motionserver.h
 
     # --- Preferences ---
     src/preferences/preferencesdialog.cpp
