@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.18] - 2026-10-18
+
+### Added
+* **JSON-Driven Motion Control & Procedural Animation Engine.** Added complete support for scripting, choreographing, and playing back character locomotion in 3D space:
+  * **Procedural Locomotion:** Waveform gait generator (`ProceduralGait`) producing continuous analytical sinusoidal movements for `walk`, `run`, and `idle`, with symmetric limb blending and rest poses.
+  * **Spatial Trajectory Solver:** Continuous circular trajectory solver (`TrajectorySolver`) supporting user-defined radius and forward-tangent orientation heading with seamless distance continuity across loop boundaries.
+  * **Timeline & Choreography Engine:** Modular `MotionEngine` orchestrating timed sequences, speed curves, loop wraps, and camera follow behavior with robust JSON script validation.
+  * **Docked Viewport Playback Bar:** Dark-themed bottom playback toolbar (`MotionPlaybackBar`) featuring Play/Pause, Stop, a 1000-step scrubbable timeline slider, precise time readouts (`mm:ss.zz`), Loop toggle, and Camera Follow toggle.
+  * **Live TCP Socket API (Port 9876):** Background TCP server (`MotionServer`) listening on `127.0.0.1:9876` accepting newline-delimited JSON commands (`play`, `pause`, `stop`, `seek`, `set_camera_follow`, `set_loop`, `load_script`, `get_status`) in full real-time synchronization with the UI and renderer.
+  * **File Menu Import:** Added **File → Import → Motion Script (.json)** with bundled walk-then-run circular demo script (`assets/scripts/circle_walk_run.json`).
+  * **Universal Bone Compatibility:** Integrated bone mapping aliases (`aliasedBoneName`) supporting Genesis 9, auto-rigged unrigged figures (e.g. `Midoriya.glb`), and pre-rigged models (e.g. `Male60.glb`).
+  * **Base Scale Preservation & Redraw Scheduling:** Automatically maintains imported character scale and triggers offscreen Vulkan swapchain updates at 60 FPS during motion playback.
+
 ## [0.3.17] - 2026-10-18
 
 ### Added
