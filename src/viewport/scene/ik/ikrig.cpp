@@ -87,7 +87,21 @@ void IkRig::build(const std::vector<IkRigBone>& bones, const std::vector<BodyMes
             onlyChild[static_cast<std::size_t>(bones[i].parent)] = static_cast<int>(i);
         }
     }
-    if (m_pelvis >= 0) {
+    // In pre-rigged models, an origin bone ("Center", "root") on the floor might branch into
+    // pole vectors or accessories. Search for a designated hip/pelvis bone first.
+    int designatedHip = -1;
+    for (std::size_t i = 0; i < n; ++i) {
+        std::string lowerName = names[i];
+        for (char& c : lowerName) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        if (lowerName == "hips" || lowerName == "pelvis" || lowerName == "hip" ||
+            lowerName == "cf_j_hips" || lowerName == "b_pelvis" || lowerName == "root_hips") {
+            designatedHip = static_cast<int>(i);
+            break;
+        }
+    }
+    if (designatedHip >= 0) {
+        m_pelvis = designatedHip;
+    } else if (m_pelvis >= 0) {
         int walk = m_pelvis;
         while (walk >= 0 && childCount[static_cast<std::size_t>(walk)] == 1) {
             walk = onlyChild[static_cast<std::size_t>(walk)];
@@ -111,8 +125,8 @@ void IkRig::build(const std::vector<IkRigBone>& bones, const std::vector<BodyMes
     std::vector<int> graphParents = m_parents;
     if (m_pelvis >= 0) {
         graphParents[static_cast<std::size_t>(m_pelvis)] = -1;
-        for (int cur = anatomicalRoot; cur >= 0 && cur != m_pelvis;
-             cur = onlyChild[static_cast<std::size_t>(cur)]) {
+        for (int cur = m_parents[static_cast<std::size_t>(m_pelvis)]; cur >= 0;
+             cur = m_parents[static_cast<std::size_t>(cur)]) {
             m_bodyNode[static_cast<std::size_t>(cur)] = 0;
         }
     }
