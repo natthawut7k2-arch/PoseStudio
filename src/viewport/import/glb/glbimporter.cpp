@@ -184,6 +184,12 @@ ModelData GlbImporter::load(const std::string& path) const {
                     vert.joints = glm::uvec4(j[0], j[1], j[2], j[3]);
 
                     cgltf_accessor_read_float(weightsAcc, v, &vert.weights.x, 4);
+                    const float sumW = vert.weights.x + vert.weights.y + vert.weights.z + vert.weights.w;
+                    if (sumW > 1e-6f) {
+                        vert.weights /= sumW;
+                    } else {
+                        vert.weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+                    }
                 } else {
                     vert.joints = glm::uvec4(0);
                     vert.weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
@@ -214,21 +220,33 @@ ModelData GlbImporter::load(const std::string& path) const {
 
     // 2. Embedded Skeleton vs Auto-Rigging
     bool hasValidEmbeddedRig = false;
-    if (data->skins_count > 0 && data->skins[0].joints_count >= 15) {
+    if (data->skins_count > 0 && data->skins[0].joints_count > 0) {
         const cgltf_skin& skin = data->skins[0];
-        std::unordered_map<const cgltf_node*, int> nodeToBone;
-        nodeToBone.reserve(skin.joints_count);
+        const cgltf_size jointCount = skin.joints_count;
 
-        for (cgltf_size j = 0; j < skin.joints_count; ++j) {
+        std::unordered_map<const cgltf_node*, int> nodeToBone;
+        nodeToBone.reserve(jointCount);
+        for (cgltf_size j = 0; j < jointCount; ++j) {
             nodeToBone[skin.joints[j]] = static_cast<int>(j);
         }
 
-        std::vector<ModelBone> bones(skin.joints_count);
-        for (cgltf_size j = 0; j < skin.joints_count; ++j) {
+        std::vector<ModelBone> bones(jointCount);
+        bool needsTopologicalSort = false;
+
+        for (cgltf_size j = 0; j < jointCount; ++j) {
             const cgltf_node* node = skin.joints[j];
             ModelBone& mb = bones[j];
-            mb.name = node->name ? node->name : ("joint_" + std::to_string(j));
-            mb.parent = (node->parent && nodeToBone.count(node->parent)) ? nodeToBone[node->parent] : -1;
+            mb.name = (node->name && std::strlen(node->name) > 0) ? node->name : ("joint_" + std::to_string(j));
+
+            // Ascend through ancestor nodes until finding one in the skin joints
+            const cgltf_node* p = node->parent;
+            while (p && !nodeToBone.count(p)) {
+                p = p->parent;
+            }
+            mb.parent = p ? nodeToBone[p] : -1;
+            if (mb.parent >= static_cast<int>(j)) {
+                needsTopologicalSort = true;
+            }
 
             float mat[16]{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1};
             cgltf_node_transform_world(node, mat);
@@ -240,7 +258,59 @@ ModelData GlbImporter::load(const std::string& path) const {
             mb.rotationLimited = glm::bvec3(false);
         }
 
-        // Basic verification: does it have a root with multiple children or identifiable joints?
+        if (needsTopologicalSort) {
+            std::vector<std::vector<int>> children(jointCount);
+            std::vector<int> roots;
+            for (int i = 0; i < static_cast<int>(jointCount); ++i) {
+                if (bones[i].parent >= 0 && bones[i].parent < static_cast<int>(jointCount)) {
+                    children[bones[i].parent].push_back(i);
+                } else {
+                    roots.push_back(i);
+                }
+            }
+
+            std::vector<int> newOrder;
+            newOrder.reserve(jointCount);
+            std::vector<int> queue = roots;
+            std::size_t head = 0;
+            while (head < queue.size()) {
+                int curr = queue[head++];
+                newOrder.push_back(curr);
+                for (int ch : children[curr]) {
+                    queue.push_back(ch);
+                }
+            }
+
+            if (newOrder.size() == jointCount) {
+                std::vector<int> oldToNew(jointCount, 0);
+                for (int newIdx = 0; newIdx < static_cast<int>(jointCount); ++newIdx) {
+                    oldToNew[newOrder[newIdx]] = newIdx;
+                }
+
+                std::vector<ModelBone> sortedBones(jointCount);
+                for (int newIdx = 0; newIdx < static_cast<int>(jointCount); ++newIdx) {
+                    int oldIdx = newOrder[newIdx];
+                    sortedBones[newIdx] = std::move(bones[oldIdx]);
+                    if (sortedBones[newIdx].parent >= 0) {
+                        sortedBones[newIdx].parent = oldToNew[sortedBones[newIdx].parent];
+                    }
+                }
+                bones = std::move(sortedBones);
+
+                // Remap mesh vertex joint indices
+                for (MeshData& mesh : model.meshes) {
+                    for (Vertex& vert : mesh.vertices) {
+                        for (int k = 0; k < 4; ++k) {
+                            uint32_t oldJ = vert.joints[k];
+                            if (oldJ < jointCount) {
+                                vert.joints[k] = static_cast<uint32_t>(oldToNew[oldJ]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!bones.empty()) {
             model.bones = std::move(bones);
             hasValidEmbeddedRig = true;
