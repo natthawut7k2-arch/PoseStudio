@@ -66,23 +66,31 @@ bool MotionEngine::loadScriptFromJson(const std::string& jsonContent) {
         }
     }
 
-    if (root.contains(QStringLiteral("motion_sequence")) && root[QStringLiteral("motion_sequence")].isArray()) {
-        QJsonArray seq = root[QStringLiteral("motion_sequence")].toArray();
-        if (!seq.isEmpty()) {
-            m_clips.clear();
-            for (const QJsonValue& val : seq) {
-                if (!val.isObject()) continue;
-                QJsonObject obj = val.toObject();
-                std::string motionName = obj.value(QStringLiteral("motion")).toString(QStringLiteral("walk")).toStdString();
-                GaitType gait = ProceduralGait::parseGaitType(motionName);
-                float duration = static_cast<float>(obj.value(QStringLiteral("duration")).toDouble(5.0));
-                float speed = static_cast<float>(obj.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
-                float freq = static_cast<float>(obj.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
-
-                m_clips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq});
-            }
-        }
+    if (!root.contains(QStringLiteral("motion_sequence")) || !root[QStringLiteral("motion_sequence")].isArray()) {
+        return false;
     }
+    QJsonArray seq = root[QStringLiteral("motion_sequence")].toArray();
+    if (seq.isEmpty()) {
+        return false;
+    }
+
+    std::vector<MotionClip> parsedClips;
+    for (const QJsonValue& val : seq) {
+        if (!val.isObject()) continue;
+        QJsonObject obj = val.toObject();
+        std::string motionName = obj.value(QStringLiteral("motion")).toString(QStringLiteral("walk")).toStdString();
+        GaitType gait = ProceduralGait::parseGaitType(motionName);
+        float duration = static_cast<float>(obj.value(QStringLiteral("duration")).toDouble(5.0));
+        float speed = static_cast<float>(obj.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
+        float freq = static_cast<float>(obj.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
+
+        parsedClips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq});
+    }
+
+    if (parsedClips.empty()) {
+        return false;
+    }
+    m_clips = std::move(parsedClips);
 
     recomputeTimeline();
     seek(0.0f);
@@ -115,6 +123,7 @@ void MotionEngine::pause() {
 
 void MotionEngine::stop() {
     m_playing = false;
+    m_distanceTraveled = 0.0f;
     seek(0.0f);
 }
 
@@ -124,6 +133,25 @@ void MotionEngine::seek(float timeSeconds) {
     } else {
         m_currentTime = 0.0f;
     }
+    m_distanceTraveled = computeDistanceAt(m_currentTime);
+}
+
+float MotionEngine::computeDistanceAt(float time) const {
+    if (m_clips.empty() || m_totalDuration <= 0.0f) return 0.0f;
+    float t = std::clamp(time, 0.0f, m_totalDuration);
+    float distance = 0.0f;
+    float tAccum = 0.0f;
+    for (size_t i = 0; i < m_clips.size(); ++i) {
+        float clipDuration = m_clips[i].duration;
+        if (t >= tAccum && t <= (tAccum + clipDuration)) {
+            distance += m_clips[i].speed * (t - tAccum);
+            break;
+        } else {
+            distance += m_clips[i].speed * clipDuration;
+            tAccum += clipDuration;
+        }
+    }
+    return distance;
 }
 
 void MotionEngine::setLoop(bool loop) {
@@ -147,10 +175,21 @@ std::string MotionEngine::currentMotionName() const {
 }
 
 MotionFrame MotionEngine::evaluate(float dt) {
-    if (m_playing) {
+    if (m_playing && !m_clips.empty() && m_totalDuration > 0.0f) {
+        float activeSpeed = 1.2f;
+        float tAccum = 0.0f;
+        for (const auto& clip : m_clips) {
+            if (m_currentTime >= tAccum && m_currentTime <= (tAccum + clip.duration)) {
+                activeSpeed = clip.speed;
+                break;
+            }
+            tAccum += clip.duration;
+        }
+
+        m_distanceTraveled += activeSpeed * dt;
         m_currentTime += dt;
         if (m_currentTime >= m_totalDuration) {
-            if (m_loop && m_totalDuration > 0.0f) {
+            if (m_loop) {
                 m_currentTime = std::fmod(m_currentTime, m_totalDuration);
             } else {
                 m_currentTime = m_totalDuration;
@@ -158,10 +197,14 @@ MotionFrame MotionEngine::evaluate(float dt) {
             }
         }
     }
-    return evaluateAt(m_currentTime);
+    return evaluateFrame(m_currentTime, m_distanceTraveled);
 }
 
 MotionFrame MotionEngine::evaluateAt(float time) {
+    return evaluateFrame(time, computeDistanceAt(time));
+}
+
+MotionFrame MotionEngine::evaluateFrame(float time, float distance) {
     MotionFrame frame;
     frame.cameraFollow = m_cameraFollow;
     if (m_clips.empty() || m_totalDuration <= 0.0f) {
@@ -171,8 +214,6 @@ MotionFrame MotionEngine::evaluateAt(float time) {
 
     float t = std::clamp(time, 0.0f, m_totalDuration);
 
-    // Compute exact cumulative distance traveled up to time t
-    float distance = 0.0f;
     float tAccum = 0.0f;
     size_t activeIndex = 0;
     float localT = 0.0f;
@@ -182,10 +223,8 @@ MotionFrame MotionEngine::evaluateAt(float time) {
         if (t >= tAccum && t <= (tAccum + clipDuration)) {
             activeIndex = i;
             localT = t - tAccum;
-            distance += m_clips[i].speed * localT;
             break;
         } else {
-            distance += m_clips[i].speed * clipDuration;
             tAccum += clipDuration;
         }
     }

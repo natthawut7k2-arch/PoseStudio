@@ -120,36 +120,45 @@ QByteArray MotionServer::handleCommand(const QByteArray& requestLine) {
         resp[QStringLiteral("current_motion")] = QString::fromStdString(m_engine->currentMotionName());
     } else if (cmd == QLatin1String("play")) {
         m_engine->play();
+        emit playRequested();
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("status")] = QStringLiteral("playing");
     } else if (cmd == QLatin1String("pause")) {
         m_engine->pause();
+        emit pauseRequested();
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("status")] = QStringLiteral("paused");
     } else if (cmd == QLatin1String("stop")) {
         m_engine->stop();
+        emit stopRequested();
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("status")] = QStringLiteral("stopped");
         resp[QStringLiteral("time")] = 0.0;
     } else if (cmd == QLatin1String("seek")) {
         float time = static_cast<float>(req.value(QStringLiteral("time")).toDouble(0.0));
         m_engine->seek(time);
+        emit seekRequested(time);
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("time")] = m_engine->currentTime();
     } else if (cmd == QLatin1String("set_camera_follow")) {
         bool follow = req.value(QStringLiteral("enabled")).toBool(true);
         m_engine->setCameraFollow(follow);
+        emit cameraFollowRequested(follow);
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("camera_follow")] = follow;
     } else if (cmd == QLatin1String("set_loop")) {
         bool loop = req.value(QStringLiteral("enabled")).toBool(true);
         m_engine->setLoop(loop);
+        emit loopRequested(loop);
         resp[QStringLiteral("ok")] = true;
         resp[QStringLiteral("loop")] = loop;
     } else if (cmd == QLatin1String("load_script")) {
         QJsonObject scriptObj = req.value(QStringLiteral("script")).toObject();
         QByteArray scriptBytes = QJsonDocument(scriptObj).toJson();
         bool loaded = m_engine->loadScriptFromJson(scriptBytes.toStdString());
+        if (loaded) {
+            emit loadScriptRequested(QString::fromUtf8(scriptBytes));
+        }
         resp[QStringLiteral("ok")] = loaded;
         resp[QStringLiteral("duration")] = m_engine->totalDuration();
         if (!loaded) {

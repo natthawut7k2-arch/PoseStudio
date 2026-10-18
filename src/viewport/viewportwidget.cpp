@@ -156,6 +156,8 @@ ViewportWidget::ViewportWidget(QWidget* parent) : QWidget(parent) {
     connect(m_playbackBar, &MotionPlaybackBar::loopToggled, m_window, &VulkanWindow::setMotionLoop);
 
     connect(m_window, &VulkanWindow::motionStateChanged, m_playbackBar, &MotionPlaybackBar::setPlaybackTime);
+    connect(m_window, &VulkanWindow::motionCameraFollowChanged, m_playbackBar, &MotionPlaybackBar::setCameraFollowState);
+    connect(m_window, &VulkanWindow::motionLoopChanged, m_playbackBar, &MotionPlaybackBar::setLoopState);
 
     createStrip(); // the floating control strip in the top-right corner
 }

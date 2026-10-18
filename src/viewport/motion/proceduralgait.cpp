@@ -50,7 +50,13 @@ GaitFrame ProceduralGait::evaluateIdle(float phase) {
         {"lShldr",   glm::vec3(0.0f, 0.0f, -5.0f)},
         {"rShldr",   glm::vec3(0.0f, 0.0f, 5.0f)},
         {"lForeArm", glm::vec3(10.0f, 0.0f, 0.0f)},
-        {"rForeArm", glm::vec3(10.0f, 0.0f, 0.0f)}
+        {"rForeArm", glm::vec3(10.0f, 0.0f, 0.0f)},
+        {"lThigh",   glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"rThigh",   glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"lShin",    glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"rShin",    glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"lFoot",    glm::vec3(0.0f, 0.0f, 0.0f)},
+        {"rFoot",    glm::vec3(0.0f, 0.0f, 0.0f)}
     };
     frame.verticalBounce = std::sin(phase) * 0.005f;
     return frame;
@@ -165,9 +171,9 @@ GaitFrame ProceduralGait::evaluateBlend(GaitType typeA, GaitType typeB,
     GaitFrame blended;
     blended.verticalBounce = (1.0f - w) * frameA.verticalBounce + w * frameB.verticalBounce;
 
-    // Linear interpolate matching bone rotations
+    // 1. Interpolate bones in frameA against frameB (or 0 if missing in B)
     for (const auto& [boneA, rotA] : frameA.boneRotations) {
-        glm::vec3 rotB = rotA;
+        glm::vec3 rotB(0.0f);
         for (const auto& [bB, rB] : frameB.boneRotations) {
             if (bB == boneA) {
                 rotB = rB;
@@ -176,6 +182,20 @@ GaitFrame ProceduralGait::evaluateBlend(GaitType typeA, GaitType typeB,
         }
         glm::vec3 blendedRot = (1.0f - w) * rotA + w * rotB;
         blended.boneRotations.emplace_back(boneA, blendedRot);
+    }
+
+    // 2. Interpolate bones that only exist in frameB (blend from 0)
+    for (const auto& [boneB, rotB] : frameB.boneRotations) {
+        bool foundInA = false;
+        for (const auto& [bA, rA] : frameA.boneRotations) {
+            if (bA == boneB) {
+                foundInA = true;
+                break;
+            }
+        }
+        if (!foundInA) {
+            blended.boneRotations.emplace_back(boneB, w * rotB);
+        }
     }
 
     return blended;

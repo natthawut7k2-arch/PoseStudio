@@ -28,6 +28,13 @@ public:
 
 signals:
     void commandExecuted(const QString& command);
+    void playRequested();
+    void pauseRequested();
+    void stopRequested();
+    void seekRequested(float seconds);
+    void cameraFollowRequested(bool enabled);
+    void loopRequested(bool enabled);
+    void loadScriptRequested(const QString& jsonContent);
 
 private slots:
     void onNewConnection();

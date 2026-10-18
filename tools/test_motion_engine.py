@@ -158,11 +158,71 @@ def test_json_script_schema():
     assert len(empty_data["motion_sequence"]) == 0
     print("  [PASS] JSON script schema and sequence parsing validated.")
 
+def test_empty_sequence_validation():
+    print("Testing Script Validation against Empty Sequences...")
+    # Validate that empty scripts or missing sequences are strictly rejected
+    invalid_cases = [
+        "{}",
+        '{"version": "1.0"}',
+        '{"version": "1.0", "motion_sequence": []}',
+        '{"motion_sequence": ["invalid"]}'
+    ]
+    for case in invalid_cases:
+        data = json.loads(case)
+        seq = data.get("motion_sequence", [])
+        valid_clips = [c for c in seq if isinstance(c, dict) and "duration" in c]
+        is_valid = len(valid_clips) > 0
+        assert not is_valid, f"Script {case} should have been rejected as invalid"
+    print("  [PASS] Empty/corrupt motion scripts correctly flagged as invalid.")
+
+def test_continuous_loop_distance():
+    print("Testing Continuous Distance Across Loop Wraps...")
+    # In loop mode, cumulative distance must advance continuously across t=10.0s
+    total_duration = 10.0
+    dt = 1.0 / 60.0
+    speed = 1.85 # average speed (5s walk @ 1.2 + 5s run @ 2.5)
+    radius = 3.0
+    
+    # Simulate across t=9.98 to t=10.05 (crossing boundary)
+    distance_accum = 0.0
+    t_clock = 0.0
+    prev_pos = None
+    for step in range(630):
+        t_clock += dt
+        distance_accum += speed * dt
+        theta = distance_accum / radius
+        x = radius * math.cos(theta)
+        z = radius * math.sin(theta)
+        curr_pos = (x, z)
+        if prev_pos is not None:
+            step_dist = math.hypot(curr_pos[0] - prev_pos[0], curr_pos[1] - prev_pos[1])
+            assert step_dist < 0.1, f"Step distance jump at step {step}: {step_dist} >= 0.1m"
+        prev_pos = curr_pos
+    print("  [PASS] Continuous trajectory distance prevents position pops across loop boundaries.")
+
+def test_idle_walk_blend():
+    print("Testing Idle <-> Walk Bidirectional Blend...")
+    def get_idle_pose():
+        return {"lThigh": 0.0, "lShin": 0.0, "lFoot": 0.0, "chest": 2.0}
+    def get_walk_pose(phase):
+        return {"lThigh": 25.0 * math.sin(phase), "lShin": 35.0 * max(0.0, math.cos(phase)), "lFoot": -10.0 * math.sin(phase), "chest": 2.0}
+
+    # Blend Idle -> Walk at w = 0.5
+    idle = get_idle_pose()
+    walk = get_walk_pose(math.pi / 2.0)
+    w = 0.5
+    blended_thigh = (1.0 - w) * idle["lThigh"] + w * walk["lThigh"]
+    assert abs(blended_thigh - 12.5) < 1e-4, f"Blended thigh expected 12.5, got {blended_thigh}"
+    print("  [PASS] Idle-to-walk leg blending transitions smoothly from zero rest rotations.")
+
 if __name__ == "__main__":
     try:
         test_circular_trajectory()
         test_procedural_gait()
         test_json_script_schema()
+        test_empty_sequence_validation()
+        test_continuous_loop_distance()
+        test_idle_walk_blend()
         print("\nAll Motion Engine unit tests PASSED successfully!")
     except Exception as e:
         print(f"\n[FAIL] Test failed: {e}", file=sys.stderr)

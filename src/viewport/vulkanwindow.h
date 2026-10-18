@@ -271,6 +271,8 @@ public:
 signals:
     /// Emitted when motion playback state or timeline advances
     void motionStateChanged(float currentSeconds, float totalSeconds, bool isPlaying);
+    void motionCameraFollowChanged(bool enabled);
+    void motionLoopChanged(bool enabled);
 
     /// Emitted when undo/redo restores a lighting state. The settings are already applied to the
     /// renderer; the Environment panel listens (via ViewportWidget) to sync its widgets.

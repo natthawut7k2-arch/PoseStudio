@@ -61,6 +61,8 @@ public:
 
 private:
     void recomputeTimeline();
+    float computeDistanceAt(float time) const;
+    MotionFrame evaluateFrame(float time, float distance);
 
     std::vector<MotionClip> m_clips;
     PathConfig              m_pathConfig;
