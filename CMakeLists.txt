@@ -414,6 +414,14 @@ add_executable(
     src/viewport/scene/ik/bodymesh.h
     src/viewport/scene/ik/cursorfilter.h      # the drag's adaptive cursor low-pass (shared with the harness)
 
+    # Procedural Motion Control & Choreography
+    src/viewport/motion/proceduralgait.cpp
+    src/viewport/motion/proceduralgait.h
+    src/viewport/motion/trajectorysolver.cpp
+    src/viewport/motion/trajectorysolver.h
+    src/viewport/motion/motionengine.cpp
+    src/viewport/motion/motionengine.h
+
     # --- Preferences ---
     src/preferences/preferencesdialog.cpp
     src/preferences/preferencesdialog.h
