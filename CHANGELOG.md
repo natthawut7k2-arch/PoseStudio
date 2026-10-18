@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.19] - 2026-10-18
+
+### Added
+* **Biomechanical Gait Realism & Configurable Motion Parameters.** Enhanced the procedural gait generator and motion JSON schema with realistic human locomotion biomechanics:
+  * **Dynamic Forward Torso Lean (`forward_lean`):** Added forward inclination tilt (walk: 3°, run: 15°) distributed across hip and chest to match human momentum and center of mass dynamics.
+  * **Natural Arm Swing & Bent-Arm Athletic Pump (`arm_swing`, `elbow_bend`):** Upper arms now counter-swing with reciprocal yaw turning toward the torso centerline; forearms feature resting elbow bends with dynamic flexion (walk: 18°-28°, run: 70°-95° athletic pump).
+  * **Dual-Phase Knee Flexion & Stance Shock Absorption (`knee_bend`, `knee_stance`):** Eliminated locked 0° knee hyperextension by introducing continuous baseline flexion (4°-8°), swing-phase ground clearance (walk: 50°, run: 80°), and stance-phase shock absorption (walk: 8°, run: 18°).
+  * **Bundled Scripts Packaging:** Sample motion scripts (`assets/scripts/circle_walk_run.json`) are now automatically deployed next to `PoseStudio.exe` and packaged inside installer and portable releases.
+
 ## [0.3.18] - 2026-10-18
 
 ### Added

@@ -126,6 +126,7 @@ jobs:
           Copy-Item build\Release\PoseStudio.exe dist\app\
           Copy-Item -Recurse build\Release\shaders dist\app\shaders
           Copy-Item -Recurse build\Release\Maquettes dist\app\Maquettes
+          Copy-Item -Recurse assets\scripts dist\app\scripts
           & "$env:QT_ROOT_DIR\bin\windeployqt.exe" `
             --release --no-translations --no-compiler-runtime dist\app\PoseStudio.exe
           if ($LASTEXITCODE -ne 0) { throw 'windeployqt failed.' }

@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.21)
 # C is enabled alongside C++ because a couple of third-party dependencies ship C implementation
 # files we compile directly into the target (e.g. miniz's inflate sources for the figure importer).
 # Without C in the language list, CMake classifies .c files as non-buildable and silently skips them.
-project(PoseStudio VERSION 0.3.18 LANGUAGES C CXX)
+project(PoseStudio VERSION 0.3.19 LANGUAGES C CXX)
 
 # ==============================================================================
 # [ COMPILER CONFIGURATION ]
@@ -760,6 +760,14 @@ add_custom_command(
             "${CMAKE_SOURCE_DIR}/resources/Maquettes"
             "$<TARGET_FILE_DIR:PoseStudio>/Maquettes"
     COMMENT "Mirroring built-in Maquettes library next to the executable"
+)
+
+add_custom_command(
+    TARGET PoseStudio POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/assets/scripts"
+            "$<TARGET_FILE_DIR:PoseStudio>/scripts"
+    COMMENT "Mirroring sample motion scripts next to the executable"
 )
 
 # NOTE: HDRI environment panoramas are user content, not build output. They live in the user's own
