@@ -73,6 +73,7 @@ public:
     bool orthographic() const { return m_orthographic; }
 
     const glm::vec3& target() const { return m_target; }
+    void             setTarget(const glm::vec3& target);
     float            pitch() const { return m_pitch; }
     float            yaw() const { return m_yaw; }
     float            distance() const { return m_distance; }

@@ -43,6 +43,10 @@ void Camera::restoreFraming(const glm::vec3& target, float yaw, float pitch, flo
     m_distance = distance > 0.0f ? distance : kDefaultDistance; // guard a zero/negative dolly
 }
 
+void Camera::setTarget(const glm::vec3& target) {
+    m_target = target;
+}
+
 void Camera::orbit(float deltaYaw, float deltaPitch) {
     m_yaw += deltaYaw;
     m_pitch = std::clamp(m_pitch + deltaPitch, kMinPitch, kMaxPitch);

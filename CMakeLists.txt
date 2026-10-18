@@ -194,6 +194,8 @@ add_executable(
     src/widgets/dragnumberbox.h
     src/widgets/menupickerbutton.cpp      # push button + exclusive QMenu (the app's "dropdown")
     src/widgets/menupickerbutton.h
+    src/widgets/motionplaybackbar.cpp     # docked viewport motion playback controls
+    src/widgets/motionplaybackbar.h
 
     # --- Properties panels (right-docker tabs) ---
     src/properties/environmentpanel.cpp

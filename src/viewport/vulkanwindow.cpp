@@ -21,6 +21,8 @@
 #include "rendering/vulkancontext.h"
 #include "rendering/vulkanrenderer.h"
 #include "scene/scene.h"
+#include "scene/model.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <QDebug>
 #include <QFileInfo>
@@ -66,6 +68,12 @@ VulkanWindow::VulkanWindow(QVulkanInstance* instance, uint32_t apiVersion, QStri
     m_fall.timer = new QTimer(this);
     m_fall.timer->setInterval(16);
     connect(m_fall.timer, &QTimer::timeout, this, &VulkanWindow::onFallTick);
+
+    // Motion animation tick (60 FPS procedural animation driver)
+    m_motionTimer = new QTimer(this);
+    m_motionTimer->setInterval(16);
+    connect(m_motionTimer, &QTimer::timeout, this, &VulkanWindow::onMotionTick);
+    m_motionTimer->start();
 
     m_diag = IkDiagnostics::fromEnvironment(); // null unless POSESTUDIO_IK_PERF / _BENCH is set
     m_script = IkScript::fromEnvironment();    // null unless POSESTUDIO_IK_SCRIPT is set
@@ -367,6 +375,77 @@ void VulkanWindow::renderFrame() {
         // Qt's event loop and abort the whole app.
         failDevice("Rendering", e);
     }
+}
+
+bool VulkanWindow::loadMotionScript(const QString& path) {
+    bool ok = m_motionEngine.loadScriptFromFile(path.toStdString());
+    if (ok) {
+        stopMotion();
+    }
+    return ok;
+}
+
+void VulkanWindow::playMotion() {
+    m_motionEngine.play();
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::pauseMotion() {
+    m_motionEngine.pause();
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::stopMotion() {
+    m_motionEngine.stop();
+    applyMotionFrame(m_motionEngine.evaluateAt(0.0f));
+    emit motionStateChanged(0.0f, m_motionEngine.totalDuration(), false);
+}
+
+void VulkanWindow::seekMotion(float seconds) {
+    m_motionEngine.seek(seconds);
+    applyMotionFrame(m_motionEngine.evaluateAt(seconds));
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
+}
+
+void VulkanWindow::setMotionLoop(bool loop) {
+    m_motionEngine.setLoop(loop);
+}
+
+void VulkanWindow::setMotionCameraFollow(bool follow) {
+    m_motionEngine.setCameraFollow(follow);
+}
+
+void VulkanWindow::onMotionTick() {
+    if (!m_motionEngine.isPlaying()) {
+        return;
+    }
+    MotionFrame frame = m_motionEngine.evaluate(0.016667f);
+    applyMotionFrame(frame);
+}
+
+void VulkanWindow::applyMotionFrame(const MotionFrame& frame) {
+    if (!frame.valid) {
+        return;
+    }
+    withRenderer([&](VulkanRenderer& r) {
+        Scene& sc = r.scene();
+        Model* model = sc.figureModel();
+        if (model) {
+            // 1. Bone rotations mapped through canonical aliases
+            model->applyPose(frame.boneRotations);
+
+            // 2. Spatial placement: translate(worldPosition) * rotateY(yawDegrees)
+            glm::mat4 T = glm::translate(glm::mat4(1.0f), frame.worldPosition);
+            glm::mat4 R = glm::rotate(glm::mat4(1.0f), glm::radians(frame.yawDegrees), glm::vec3(0.0f, 1.0f, 0.0f));
+            model->setTransform(T * R);
+
+            // 3. Camera follow tracking
+            if (frame.cameraFollow) {
+                sc.camera().setTarget(frame.worldPosition + glm::vec3(0.0f, 0.9f, 0.0f));
+            }
+        }
+    });
+    emit motionStateChanged(m_motionEngine.currentTime(), m_motionEngine.totalDuration(), m_motionEngine.isPlaying());
 }
 
 } // namespace pose

@@ -39,6 +39,7 @@ namespace pose {
 
 class ViewportStrip;
 class VulkanWindow;
+class MotionPlaybackBar;
 struct JointTransform;
 class JointModalInput;
 struct LightingSettings;
@@ -65,6 +66,12 @@ public:
     /// Imports a GLB/glTF file into the 3D scene. No-op if the viewport degraded to the
     /// Vulkan-unavailable message.
     void importGlb(const QString& path);
+
+    /// Loads a JSON motion choreography script into the viewport motion engine.
+    bool loadMotionScript(const QString& path);
+
+    /// The docked bottom playback bar widget.
+    MotionPlaybackBar* motionPlaybackBar() const { return m_playbackBar; }
 
     /// Whether the scene holds a posable figure (gates the pose save/load menu actions).
     bool hasPosableFigure() const;
@@ -218,6 +225,7 @@ private:
     QPointF                          m_scriptCursor;            // the scripted test's `app` cursor, global
     QWidget*                         m_container = nullptr;     // the createWindowContainer wrapper
     ViewportStrip*                   m_strip = nullptr;         // the floating top-right control strip
+    MotionPlaybackBar*               m_playbackBar = nullptr;   // docked bottom motion playback controls
     QWidget*                         m_filteredWindow = nullptr; // top-level we filter for move/resize
 };
 

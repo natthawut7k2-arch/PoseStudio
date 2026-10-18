@@ -49,6 +49,7 @@
 #include "scene/projectfile.h"      // ProjectDocument (the .pss save/load state)
 #include "scene/shademode.h"        // kDefaultShadeMode
 #include "projectstate.h"           // ProjectState (the .pss document's runtime state)
+#include "motion/motionengine.h"    // Motion choreography engine
 #include "viewpreset.h"
 
 #include <QElapsedTimer>
@@ -254,7 +255,21 @@ public:
     /// gesture; undoing the entry emits lightingRestored so the panel's widgets follow.
     void registerLightingUndo(const LightingSettings& preEdit);
 
+    /// Motion choreography controls
+    bool loadMotionScript(const QString& path);
+    void playMotion();
+    void pauseMotion();
+    void stopMotion();
+    void seekMotion(float seconds);
+    void setMotionLoop(bool loop);
+    void setMotionCameraFollow(bool follow);
+    MotionEngine& motionEngine() { return m_motionEngine; }
+    const MotionEngine& motionEngine() const { return m_motionEngine; }
+
 signals:
+    /// Emitted when motion playback state or timeline advances
+    void motionStateChanged(float currentSeconds, float totalSeconds, bool isPlaying);
+
     /// Emitted when undo/redo restores a lighting state. The settings are already applied to the
     /// renderer; the Environment panel listens (via ViewportWidget) to sync its widgets.
     void lightingRestored(const LightingSettings& settings);
@@ -696,6 +711,12 @@ private:
     void scriptReport(const char* label); ///< `report`: what a user would see, as numbers.
     bool scriptMetric(const QString& name, double& value); ///< A number `expect` can assert on.
     std::unique_ptr<IkScript> m_script;
+
+    // Motion animation tick & frame application
+    void onMotionTick();
+    void applyMotionFrame(const MotionFrame& frame);
+    MotionEngine m_motionEngine;
+    QTimer*      m_motionTimer = nullptr;
 };
 
 } // namespace pose
