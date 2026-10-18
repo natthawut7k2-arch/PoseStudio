@@ -423,6 +423,8 @@ add_executable(
     src/viewport/motion/trajectorysolver.h
     src/viewport/motion/motionengine.cpp
     src/viewport/motion/motionengine.h
+    src/viewport/motion/motionserver.cpp
+    src/viewport/motion/motionserver.h
 
     # --- Preferences ---
     src/preferences/preferencesdialog.cpp

@@ -75,6 +75,7 @@ class Scene;
 class VulkanContext;
 class VulkanError;
 class VulkanRenderer;
+class MotionServer;
 struct IkDiagnostics;
 struct IkScript;
 
@@ -265,6 +266,7 @@ public:
     void setMotionCameraFollow(bool follow);
     MotionEngine& motionEngine() { return m_motionEngine; }
     const MotionEngine& motionEngine() const { return m_motionEngine; }
+    MotionServer* motionServer() const { return m_motionServer.get(); }
 
 signals:
     /// Emitted when motion playback state or timeline advances
@@ -717,6 +719,7 @@ private:
     void applyMotionFrame(const MotionFrame& frame);
     MotionEngine m_motionEngine;
     QTimer*      m_motionTimer = nullptr;
+    std::unique_ptr<MotionServer> m_motionServer;
 };
 
 } // namespace pose

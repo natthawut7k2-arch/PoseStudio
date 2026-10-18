@@ -22,6 +22,7 @@
 #include "rendering/vulkanrenderer.h"
 #include "scene/scene.h"
 #include "scene/model.h"
+#include "motion/motionserver.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <QDebug>
@@ -74,6 +75,10 @@ VulkanWindow::VulkanWindow(QVulkanInstance* instance, uint32_t apiVersion, QStri
     m_motionTimer->setInterval(16);
     connect(m_motionTimer, &QTimer::timeout, this, &VulkanWindow::onMotionTick);
     m_motionTimer->start();
+
+    // Local TCP socket server for live JSON motion choreography control
+    m_motionServer = std::make_unique<MotionServer>(&m_motionEngine, this);
+    m_motionServer->start(9876);
 
     m_diag = IkDiagnostics::fromEnvironment(); // null unless POSESTUDIO_IK_PERF / _BENCH is set
     m_script = IkScript::fromEnvironment();    // null unless POSESTUDIO_IK_SCRIPT is set
