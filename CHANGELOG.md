@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.17] - 2026-10-18
 
 ### Added
-* **GLB / glTF 3D Model Import & Automatic Humanoid Rigging.** Added full support for importing `.glb` and `.gltf` 3D character files directly into the viewport via **File → Import → .GLB (GL Transmission Format .glTF)**. For unrigged models, PoseStudio automatically analyzes body geometry, generates a 21-bone standard humanoid skeleton matching its Full-Body IK (`IkRig`) and `BalanceController` conventions, and computes smooth segment-distance skinning weights. The imported character can be immediately posed, manipulated, and animated with physics-based balance and grounding.
+* **GLB / glTF 3D Model Import (Pre-Rigged & Unrigged).** Added full support for importing `.glb` and `.gltf` 3D character files directly into the viewport via **File → Import → .GLB (GL Transmission Format .glTF)**.
+  * **Pre-Rigged Models:** Preserves existing embedded glTF skins, bone hierarchies, and vertex weights (e.g. from Koikatsu, Blender, Mixamo, VRoid). Resolves complex parent-child relationships, enforces strict topological ordering (`parent < i`), filters non-deforming collision/helper bones, and roots Full-Body IK at the anatomical hips for physics-based balance.
+  * **Unrigged Models:** Automatically analyzes body geometry, synthesizes a 21-bone standard humanoid skeleton matching `IkRig` and `BalanceController` conventions, and computes smooth segment-distance skinning weights with lateral side affinity.
 * **Multilingual support (English / Thai) with runtime switching.** Added full internationalization (i18n) infrastructure via `AppLanguage`. Users can switch between English and ภาษาไทย (Thai) from Preferences → Interface (remembered across restarts). The entire user interface — menus, panels, dialogs, viewport controls, shading modes, and tooltips (282 messages + standard dialog buttons) — is fully translated into Thai, while keeping English source code strings clean and untouched. Future languages can be added seamlessly by registering a new `.qm` catalog.
 
 ### Changed
