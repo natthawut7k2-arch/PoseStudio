@@ -161,10 +161,15 @@ def test_json_script_schema():
     total_duration = sum(seq["duration"] for seq in data["motion_sequence"])
     assert abs(total_duration - 10.0) < 1e-4, f"Total duration expected 10.0s, got {total_duration}"
     
-    # Test empty sequence error handling
-    empty_json = '{"version": "1.0", "motion_sequence": []}'
-    empty_data = json.loads(empty_json)
-    assert len(empty_data["motion_sequence"]) == 0
+    # Test AI Studio biomechanics root schema
+    with open("assets/scripts/normal_walk.json", "r", encoding="utf-8") as f:
+        ai_data = json.load(f)
+    assert "biomechanics" in ai_data
+    assert ai_data["biomechanics"]["forward_lean"] == 3.5
+    assert ai_data["biomechanics"]["arm_swing"] == 24
+    assert ai_data["path"]["radius"] == 3.2
+    assert ai_data["motion_sequence"][0]["forward_lean"] == 3.5
+
     print("  [PASS] JSON script schema and sequence parsing validated.")
 
 def test_empty_sequence_validation():

@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "name": "Normal Walk",
+  "camera_follow": true,
+  "path": {
+    "type": "circle",
+    "radius": 3.2,
+    "center": [0, 0, 0],
+    "loop": true
+  },
+  "biomechanics": {
+    "forward_lean": 3.5,
+    "arm_swing": 24,
+    "elbow_bend": 22,
+    "knee_bend": 48,
+    "knee_stance": 8,
+    "torso_twist": 5,
+    "speed": 1.35,
+    "frequency": 1.75,
+    "hip_sway": 3.5,
+    "bounce_height": 0.038
+  },
+  "motion_sequence": [
+    {
+      "motion": "walk",
+      "duration": 10.0,
+      "speed": 1.35,
+      "frequency": 1.75,
+      "forward_lean": 3.5,
+      "arm_swing": 24.0,
+      "elbow_bend": 22.0,
+      "knee_bend": 48.0,
+      "knee_stance": 8.0,
+      "torso_twist": 5.0
+    }
+  ]
+}

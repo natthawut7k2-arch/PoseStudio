@@ -90,36 +90,66 @@ bool MotionEngine::loadScriptFromJson(const std::string& jsonContent) {
     }
 
     std::vector<MotionClip> parsedClips;
-    for (const QJsonValue& val : seq) {
-        if (!val.isObject()) continue;
-        QJsonObject obj = val.toObject();
-        std::string motionName = obj.value(QStringLiteral("motion")).toString(QStringLiteral("walk")).toStdString();
-        GaitType gait = ProceduralGait::parseGaitType(motionName);
-        float duration = static_cast<float>(obj.value(QStringLiteral("duration")).toDouble(5.0));
-        float speed = static_cast<float>(obj.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
-        float freq = static_cast<float>(obj.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
+
+    if (root.contains(QStringLiteral("biomechanics")) && root[QStringLiteral("biomechanics")].isObject()) {
+        QJsonObject bio = root[QStringLiteral("biomechanics")].toObject();
+        GaitType gait = GaitType::Walk;
+        std::string name = m_scriptName;
+        std::string nameLower = name;
+        std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+        if (nameLower.find("run") != std::string::npos || nameLower.find("sprint") != std::string::npos || nameLower.find("dash") != std::string::npos) {
+            gait = GaitType::Run;
+        }
+
+        float speed = static_cast<float>(bio.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
+        float freq  = static_cast<float>(bio.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
+        float duration = 10.0f;
 
         GaitParams params;
-        if (obj.contains(QStringLiteral("forward_lean"))) {
-            params.forwardLean = static_cast<float>(obj.value(QStringLiteral("forward_lean")).toDouble(-1.0));
-        }
-        if (obj.contains(QStringLiteral("arm_swing"))) {
-            params.armSwing = static_cast<float>(obj.value(QStringLiteral("arm_swing")).toDouble(-1.0));
-        }
-        if (obj.contains(QStringLiteral("elbow_bend"))) {
-            params.elbowBend = static_cast<float>(obj.value(QStringLiteral("elbow_bend")).toDouble(-1.0));
-        }
-        if (obj.contains(QStringLiteral("knee_bend"))) {
-            params.kneeBend = static_cast<float>(obj.value(QStringLiteral("knee_bend")).toDouble(-1.0));
-        }
-        if (obj.contains(QStringLiteral("knee_stance"))) {
-            params.kneeStance = static_cast<float>(obj.value(QStringLiteral("knee_stance")).toDouble(-1.0));
-        }
-        if (obj.contains(QStringLiteral("torso_twist"))) {
-            params.torsoTwist = static_cast<float>(obj.value(QStringLiteral("torso_twist")).toDouble(-1.0));
+        params.forwardLean = static_cast<float>(bio.value(QStringLiteral("forward_lean")).toDouble(3.0));
+        params.armSwing    = static_cast<float>(bio.value(QStringLiteral("arm_swing")).toDouble(22.0));
+        params.elbowBend   = static_cast<float>(bio.value(QStringLiteral("elbow_bend")).toDouble(20.0));
+        params.kneeBend    = static_cast<float>(bio.value(QStringLiteral("knee_bend")).toDouble(48.0));
+        params.kneeStance  = static_cast<float>(bio.value(QStringLiteral("knee_stance")).toDouble(8.0));
+        params.torsoTwist  = static_cast<float>(bio.value(QStringLiteral("torso_twist")).toDouble(5.0));
+
+        if (seq[0].isObject() && seq[0].toObject().contains(QStringLiteral("duration"))) {
+            duration = static_cast<float>(seq[0].toObject().value(QStringLiteral("duration")).toDouble(10.0));
         }
 
-        parsedClips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq, params});
+        parsedClips.push_back({gait, name, duration, speed, freq, params});
+    } else {
+        for (const QJsonValue& val : seq) {
+            if (!val.isObject()) continue;
+            QJsonObject obj = val.toObject();
+            std::string motionName = obj.value(QStringLiteral("motion")).toString(QStringLiteral("walk")).toStdString();
+            GaitType gait = ProceduralGait::parseGaitType(motionName);
+            float duration = static_cast<float>(obj.value(QStringLiteral("duration")).toDouble(5.0));
+            float speed = static_cast<float>(obj.value(QStringLiteral("speed")).toDouble(ProceduralGait::defaultSpeed(gait)));
+            float freq = static_cast<float>(obj.value(QStringLiteral("frequency")).toDouble(ProceduralGait::defaultFrequency(gait)));
+
+            GaitParams params;
+            if (obj.contains(QStringLiteral("forward_lean"))) {
+                params.forwardLean = static_cast<float>(obj.value(QStringLiteral("forward_lean")).toDouble(-1.0));
+            }
+            if (obj.contains(QStringLiteral("arm_swing"))) {
+                params.armSwing = static_cast<float>(obj.value(QStringLiteral("arm_swing")).toDouble(-1.0));
+            }
+            if (obj.contains(QStringLiteral("elbow_bend"))) {
+                params.elbowBend = static_cast<float>(obj.value(QStringLiteral("elbow_bend")).toDouble(-1.0));
+            }
+            if (obj.contains(QStringLiteral("knee_bend"))) {
+                params.kneeBend = static_cast<float>(obj.value(QStringLiteral("knee_bend")).toDouble(-1.0));
+            }
+            if (obj.contains(QStringLiteral("knee_stance"))) {
+                params.kneeStance = static_cast<float>(obj.value(QStringLiteral("knee_stance")).toDouble(-1.0));
+            }
+            if (obj.contains(QStringLiteral("torso_twist"))) {
+                params.torsoTwist = static_cast<float>(obj.value(QStringLiteral("torso_twist")).toDouble(-1.0));
+            }
+
+            parsedClips.push_back({gait, motionName, std::max(0.1f, duration), speed, freq, params});
+        }
     }
 
     if (parsedClips.empty()) {
