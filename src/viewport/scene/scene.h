@@ -232,6 +232,9 @@ public:
     bool ikGrabPointWorld(glm::vec3& out) const;
     /// The posable figure's runtime skeleton, read-only, or null (diagnostics — see Model::armature).
     const Armature* figureArmature() const;
+    /// The active posable figure model, or null if none or a non-figure is selected.
+    Model*          figureModel();
+    const Model*    figureModel() const;
     /// Diagnostics (the IK benchmark): puts the grab point @p share of the way along the rigid
     /// limb segment the selected bone belongs to (Armature::setIkGrabOnSegment).
     void setIkGrabOnSegment(float share);
@@ -270,14 +273,6 @@ public:
     bool loadPose(const std::string& path);
 
 private:
-    /// The figure the posing API addresses: the ACTIVE figure (activeFigureIndex — the last
-    /// clicked, else the first), but ONLY while it is the selection or nothing is selected.
-    /// With a different model selected (an OBJ next to a figure) it is null, so every pose
-    /// utility no-ops and hasPosableFigure() greys the actions — they must never edit a figure
-    /// that isn't the outlined selection.
-    Model*       figureModel();
-    const Model* figureModel() const;
-
     VulkanContext& m_context;
 
     // Member order = reverse destruction order (after ~Scene's explicit model teardown): the

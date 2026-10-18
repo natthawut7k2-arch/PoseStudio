@@ -483,7 +483,7 @@ void VulkanWindow::applyMotionFrame(const MotionFrame& frame) {
 
             // 3. Camera follow tracking
             if (frame.cameraFollow) {
-                sc.camera().setTarget(frame.worldPosition + glm::vec3(0.0f, 0.9f, 0.0f));
+                r.camera().setTarget(frame.worldPosition + glm::vec3(0.0f, 0.9f, 0.0f));
             }
         }
     });

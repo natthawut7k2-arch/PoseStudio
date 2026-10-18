@@ -54,6 +54,7 @@
 
 #include <QElapsedTimer>
 #include <QPointF>
+#include <QString>
 #include <QWindow>
 
 #include <glm/glm.hpp>

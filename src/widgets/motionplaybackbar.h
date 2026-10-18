@@ -1,6 +1,7 @@
 #ifndef MOTION_PLAYBACK_BAR_H
 #define MOTION_PLAYBACK_BAR_H
 
+#include <QString>
 #include <QWidget>
 
 class QPushButton;

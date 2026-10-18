@@ -520,6 +520,7 @@ target_include_directories(PoseStudio PRIVATE
     src/viewport/rendering
     src/viewport/scene
     src/viewport/scene/ik
+    src/viewport/motion
     src/viewport/import
     src/viewport/import/obj
     src/viewport/import/figure
