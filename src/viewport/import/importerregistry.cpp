@@ -7,6 +7,7 @@
 
 #include "figureutils.h" // toLowerAscii
 #include "obj/objimporter.h"
+#include "glb/glbimporter.h"
 
 namespace pose {
 
@@ -28,6 +29,7 @@ std::string extensionOf(const std::string& path) {
 ImporterRegistry::ImporterRegistry() {
     // The one explicit list of built-in importers. Add a new format here (and under import/<fmt>/).
     m_importers.push_back(std::make_unique<ObjImporter>());
+    m_importers.push_back(std::make_unique<GlbImporter>());
 }
 
 const ImporterRegistry& ImporterRegistry::instance() {
