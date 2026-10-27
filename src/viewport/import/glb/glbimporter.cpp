@@ -9,6 +9,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -101,9 +102,30 @@ ModelData GlbImporter::load(const std::string& path) const {
     const std::string baseDir = getBaseDir(path);
     ModelData model;
 
-    // 1. Extract Meshes and Primitives
-    for (cgltf_size m = 0; m < data->meshes_count; ++m) {
-        const cgltf_mesh& gltfMesh = data->meshes[m];
+    // 1. Extract Meshes and Primitives — one ModelData mesh per (node instance, primitive).
+    //
+    // glTF stores each mesh's vertex data in ITS OWN space; the node that references it carries
+    // the transform that places it in the scene (Blender exports, for instance, commonly bake a
+    // -90°/+90° X rotation into each node to convert Z-up authoring to Y-up glTF). Ignoring that
+    // transform imports the geometry lying on its back and, worse, feeds the auto-rigger a
+    // bounding box measured on the wrong axis. So mesh nodes are walked (not the mesh list) and
+    // their world transform applied to positions and normals. SKINNED primitives are the
+    // exception: their vertices live in the skin's bind space and the joint matrices already
+    // carry the placement (glTF ignores the mesh node transform for them).
+    for (cgltf_size nodeIndex = 0; nodeIndex < data->nodes_count; ++nodeIndex) {
+        const cgltf_node& node = data->nodes[nodeIndex];
+        if (!node.mesh) {
+            continue;
+        }
+
+        cgltf_float worldRaw[16];
+        cgltf_node_transform_world(&node, worldRaw);
+        const glm::mat4 world = glm::make_mat4(worldRaw);
+        // Normals need the inverse-transpose of the upper-left 3×3 (correct under non-uniform
+        // scale). For the common pure rotation it is the rotation itself.
+        const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(world)));
+
+        const cgltf_mesh& gltfMesh = *node.mesh;
 
         for (cgltf_size p = 0; p < gltfMesh.primitives_count; ++p) {
             const cgltf_primitive& prim = gltfMesh.primitives[p];
@@ -112,6 +134,9 @@ ModelData GlbImporter::load(const std::string& path) const {
             }
 
             MeshData mesh;
+            mesh.name = (gltfMesh.name && std::strlen(gltfMesh.name) > 0)
+                            ? gltfMesh.name
+                            : ((node.name && std::strlen(node.name) > 0) ? node.name : "");
 
             // Extract material settings
             if (prim.material) {
@@ -126,8 +151,27 @@ ModelData GlbImporter::load(const std::string& path) const {
                     mesh.diffuse = extractTextureSource(pbr.base_color_texture.texture, baseDir);
                     mesh.roughnessMap = extractTextureSource(pbr.metallic_roughness_texture.texture, baseDir);
                 }
+                // Tangent-space normal map: same decode path the figure importer uses (the Qt layer
+                // decodes it, the shader perturbs with the mesh's generated tangents).
+                if (mat->normal_texture.texture) {
+                    mesh.normal = extractTextureSource(mat->normal_texture.texture, baseDir);
+                    mesh.normalMode = 1;
+                    mesh.normalStrength = mat->normal_texture.scale;
+                }
                 if (mat->alpha_mode == cgltf_alpha_mode_blend) {
-                    mesh.opacity = 0.99f;
+                    // A baseColorFactor alpha below 1 is authored scalar transparency and is kept
+                    // as-is. Otherwise the blend request may still be meaningless (exporters mark
+                    // every RGBA albedo BLEND); mark it up to the decode layer, which keeps it
+                    // blended only if the texture actually has transparency.
+                    const float alpha = mat->has_pbr_metallic_roughness
+                                            ? mat->pbr_metallic_roughness.base_color_factor[3]
+                                            : 1.0f;
+                    if (alpha < 0.999f) {
+                        mesh.opacity = alpha;
+                    } else {
+                        mesh.opacity = 0.99f; // < 1 => the transparent pass until decode decides
+                        mesh.blendByTexture = true;
+                    }
                 } else if (mat->alpha_mode == cgltf_alpha_mode_mask) {
                     mesh.hasOpacityMask = true;
                 }
@@ -158,6 +202,10 @@ ModelData GlbImporter::load(const std::string& path) const {
             if (!posAcc) {
                 continue;
             }
+
+            // A primitive carrying joint indices/weights is skin-bound: its vertices stay in bind
+            // space. Anything else is static geometry placed by its node transform.
+            const bool skinnedPrim = jointsAcc && weightsAcc;
 
             const cgltf_size vertCount = posAcc->count;
             mesh.vertices.resize(vertCount);
@@ -193,6 +241,15 @@ ModelData GlbImporter::load(const std::string& path) const {
                 } else {
                     vert.joints = glm::uvec4(0);
                     vert.weights = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+                }
+
+                if (!skinnedPrim) {
+                    vert.pos = glm::vec3(world * glm::vec4(vert.pos, 1.0f));
+                    if (normAcc) {
+                        const glm::vec3 n = normalMatrix * vert.normal;
+                        const float len = glm::length(n);
+                        vert.normal = (len > 1e-6f) ? n / len : glm::vec3(0.0f, 1.0f, 0.0f);
+                    }
                 }
             }
 
@@ -318,7 +375,8 @@ ModelData GlbImporter::load(const std::string& path) const {
     }
 
     if (!hasValidEmbeddedRig) {
-        // Automatically bind standard 21-bone humanoid skeleton and distance-weighted skinning
+        // No usable skeleton: normalize the figure to PoseStudio's standing, +Z-facing, human-scale
+        // convention and bind the standard 21-bone humanoid rig with distance-weighted skinning.
         HumanoidAutoRigger::buildAndSkin(model);
     }
 

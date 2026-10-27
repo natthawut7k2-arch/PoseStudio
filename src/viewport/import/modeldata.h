@@ -55,6 +55,10 @@ using DecodedImagePtr = std::shared_ptr<const DecodedImage>;
 struct MeshData {
     std::vector<Vertex>   vertices;
     std::vector<uint32_t> indices;
+    // Source mesh/node name (the glTF importer fills it today; formats without names leave it
+    // empty). Carries semantic hints the import pipeline can use where the vertices alone are
+    // ambiguous — e.g. the auto-rigger binds a mesh named "Hair…"/"Face…" rigidly to the head.
+    std::string           name;
     // Material diffuse color when present, else this default for geometry with no material/texture:
     // a light neutral grey, hex #D1D1D1. Stored LINEAR (sRGB->linear of 209/209/209) because the lit
     // fragment output is hardware-encoded to the sRGB swapchain — so a fully-lit surface reads as
@@ -117,6 +121,13 @@ struct MeshData {
     float                 topCoatRoughness = 0.65f;
     float                 translucencyWeight = 0.5f; // × the translucency map's luminance
     float                 opacity   = 1.0f; // < 1 => drawn in the transparent pass, alpha-blended.
+    // The source material asked for blending but authored no scalar opacity of its own (glTF
+    // alphaMode BLEND with baseColorFactor alpha = 1). Whether the mesh really needs the
+    // transparent pass then depends on its diffuse map's alpha, which only the Qt decode layer can
+    // see: it keeps the mesh blended when the map has transparency and demotes it to opaque when
+    // the map is solid. Authored scalar opacity (OBJ `d`, glTF alpha < 1) never sets this and is
+    // never demoted. See ModelImportService::decodeModelTextures.
+    bool                  blendByTexture = false;
 
     // For pose correctives: the source *base* (pre-de-index) vertex index each render vertex
     // came from — the key that maps a corrective's base-vertex deltas onto these render vertices.

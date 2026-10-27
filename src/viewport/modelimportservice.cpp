@@ -25,6 +25,8 @@
 #include <QImageReader>
 #include <QProgressDialog>
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <exception>
 #include <memory>
@@ -90,6 +92,34 @@ QImage readCapped(const TextureSource& src) {
                              Qt::SmoothTransformation);
     }
     return image;
+}
+
+// True when every texel the mesh's UVs actually sample is fully opaque. glTF material authors often
+// leave alphaMode at BLEND for the whole file (any RGBA albedo takes the blend path in Blender's
+// exporter) even though the textures are opaque, which would cost the mesh depth writes, its
+// pickable surface and its shadows for nothing. Only UV-covered texels count: atlas maps commonly
+// have transparent padding OUTSIDE the UV islands (an opaque pair of shorts, say), so scanning the
+// whole image would keep such a mesh transparent. A textureless mesh has nothing to make it
+// transparent either. A transparent texel INSIDE an island with opaque corners is not detected
+// here — that last case still needs real blending.
+bool samplesOnlyOpaqueTexels(const MeshData& mesh) {
+    const DecodedImagePtr& img = mesh.diffuseImage;
+    if (!img || img->width == 0 || img->height == 0 || img->pixels.empty()) {
+        return true;
+    }
+    const float fw = static_cast<float>(img->width);
+    const float fh = static_cast<float>(img->height);
+    for (const Vertex& v : mesh.vertices) {
+        const float u = v.uv.x - std::floor(v.uv.x); // wrap: REPEAT is the sampler default
+        const float t = v.uv.y - std::floor(v.uv.y);
+        const uint32_t x = static_cast<uint32_t>(std::min(u * fw, fw - 1.0f));
+        const uint32_t y = static_cast<uint32_t>(std::min(t * fh, fh - 1.0f));
+        const std::size_t alpha = (static_cast<std::size_t>(y) * img->width + x) * 4 + 3;
+        if (alpha < img->pixels.size() && img->pixels[alpha] < 250) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // Decodes a TextureSource into a tightly-packed RGBA8 image (capped — see kMaxTextureSize).
@@ -273,6 +303,13 @@ void ModelImportService::decodeModelTextures(ModelData& data) {
             mesh.hasOpacityMask = combo.masked;
         } else if (!k.diffuse.empty()) {
             mesh.diffuseImage = images[k.diffuse];
+        }
+        // A material that only blended because of its texture — no authored scalar opacity — is
+        // opaque when that texture samples as fully opaque: demote it so it gets the depth-writing
+        // pass, casts shadows, and stays clickable (Model::pickSurface).
+        if (mesh.blendByTexture && !mesh.hasOpacityMask && samplesOnlyOpaqueTexels(mesh)) {
+            mesh.opacity = 1.0f;
+            mesh.blendByTexture = false;
         }
         if (!k.normal.empty()) {
             mesh.normalImage = images[k.normal];
